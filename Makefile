@@ -1,5 +1,5 @@
 %.swf: %.as
-	mxmlc $<
+	mxmlc -static-link-runtime-shared-libraries $<
 
 clean:
 	rm -f *.swf
