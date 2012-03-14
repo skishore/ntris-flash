@@ -8,7 +8,11 @@ package {
   import flash.geom.*;
   import flash.text.TextField;
 
+  [SWF(width="320", height="480")]
+
   public class Board extends MovieClip {
+    private static const WIDTH:int = 320;
+    private static const HEIGHT:int = 480;
     private static const FRAMERATE:int = 60;
     private static const FRAMEDELAY:Number = 1000/FRAMERATE;
 
@@ -29,7 +33,7 @@ package {
     private var canvasBitmap:Bitmap;
 
     public function Board() {
-      canvasBD = new BitmapData(500, 375, false, 0xffffff);
+      canvasBD = new BitmapData(WIDTH, HEIGHT, false, 0xffffff);
       canvasBitmap = new Bitmap(canvasBD);
       addChild(canvasBitmap);
 
@@ -43,11 +47,7 @@ package {
       _overSleepTime = (_beforeTime - _afterTime) - _sleepTime;
 
       gameLoopUpdate();
-
-      canvasBD.lock();
-      canvasBD.fillRect(new Rectangle(0, 0, 500, 375), 0xffffff);
       gameLoopDraw();
-      canvasBD.unlock();
 
       _afterTime = getTimer();
       _timeDiff = _afterTime - _beforeTime;
@@ -74,10 +74,15 @@ package {
     }
 
     private function gameLoopDraw():void {
+      canvasBD.lock();
+
+      canvasBD.fillRect(new Rectangle(0, 0, WIDTH, HEIGHT), 0xffffff);
       canvasBD.setPixel(curTime, curTime, 0x000000);
       var tf:TextField = new TextField();
       tf.text = "some text";
       canvasBD.draw(tf);
+
+      canvasBD.unlock();
     }
   }
 }
