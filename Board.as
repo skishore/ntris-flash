@@ -18,12 +18,16 @@ package {
     private static const FRAMEDELAY:Number = 1000/FRAMERATE;
 
     // Timing variables
+    private var timer:Timer;
+    private var curTime:int = 0;
+
     private var beforeTime:int = 0;
     private var afterTime:int = 0;
     private var sleepTime:int = 0;
 
-    private var timer:Timer;
-    private var curTime:int = 0;
+    private var numFrames:int = 0;
+    private var lastSecond:int = 0;
+    private var framerateText:TextField = new TextField();
 
     // Canvas bitmap data
     private var canvasBD:BitmapData;
@@ -42,6 +46,14 @@ package {
     private function gameLoop(e:TimerEvent):void {
       beforeTime = getTimer();
       var oversleepTime:int = (beforeTime - afterTime) - sleepTime;
+
+      numFrames++;
+      if (beforeTime > lastSecond + 1000) {
+        var framesPerSecond:Number = 1000.0*numFrames/(beforeTime - lastSecond);
+        framerateText.text = "FPS: " + framesPerSecond.toPrecision(4);
+        numFrames = 0;
+        lastSecond = beforeTime;
+      }
 
       update();
       draw();
@@ -68,9 +80,7 @@ package {
 
       canvasBD.fillRect(new Rectangle(0, 0, WIDTH, HEIGHT), 0xffffff);
       canvasBD.setPixel(curTime, curTime, 0x000000);
-      var tf:TextField = new TextField();
-      tf.text = "some text";
-      canvasBD.draw(tf);
+      canvasBD.draw(framerateText);
 
       canvasBD.unlock();
     }
