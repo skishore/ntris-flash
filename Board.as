@@ -11,24 +11,21 @@ package {
   [SWF(width="320", height="480")]
 
   public class Board extends MovieClip {
+    // Game engine constants
     private static const WIDTH:int = 320;
     private static const HEIGHT:int = 480;
     private static const FRAMERATE:int = 60;
     private static const FRAMEDELAY:Number = 1000/FRAMERATE;
 
-    // Timing
-    private var _period:Number = FRAMEDELAY;
-    private var _beforeTime:int = 0;
-    private var _afterTime:int = 0;
-    private var _timeDiff:int = 0;
-    private var _sleepTime:int = 0;
-    private var _overSleepTime:int = 0;
-    private var _excess:int = 0;
+    // Timing variables
+    private var beforeTime:int = 0;
+    private var afterTime:int = 0;
+    private var sleepTime:int = 0;
 
     private var timer:Timer;
     private var curTime:int = 0;
 
-    // Canvas
+    // Canvas bitmap data
     private var canvasBD:BitmapData;
     private var canvasBitmap:Bitmap;
 
@@ -43,37 +40,30 @@ package {
     }
 
     private function gameLoop(e:TimerEvent):void {
-      _beforeTime = getTimer();
-      _overSleepTime = (_beforeTime - _afterTime) - _sleepTime;
+      beforeTime = getTimer();
+      var oversleepTime:int = (beforeTime - afterTime) - sleepTime;
 
-      gameLoopUpdate();
-      gameLoopDraw();
+      update();
+      draw();
 
-      _afterTime = getTimer();
-      _timeDiff = _afterTime - _beforeTime;
-      _sleepTime = (_period - _timeDiff) - _overSleepTime;
-      if(_sleepTime <= 0) {
-        _excess -= _sleepTime;
-        _sleepTime = 2;
+      afterTime = getTimer();
+      sleepTime = FRAMEDELAY - (afterTime - beforeTime) - oversleepTime;
+      if(sleepTime <= 0) {
+        sleepTime = 0;
       }
 
       timer.reset();
-      timer.delay = _sleepTime;
+      timer.delay = sleepTime;
       timer.start();
-
-      while(_excess > _period) {
-        gameLoopUpdate();
-        _excess -= _period;
-      }
 
       e.updateAfterEvent();
     }
 
-    private function gameLoopUpdate():void {
+    private function update():void {
       curTime++;
     }
 
-    private function gameLoopDraw():void {
+    private function draw():void {
       canvasBD.lock();
 
       canvasBD.fillRect(new Rectangle(0, 0, WIDTH, HEIGHT), 0xffffff);
