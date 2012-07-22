@@ -9,6 +9,8 @@ package {
   import flash.geom.Rectangle;
   import flash.text.TextField;
 
+  import Color;
+
   [SWF(width="367", height="546")]
 
   public class Board extends MovieClip {
@@ -113,20 +115,21 @@ package {
       canvasBD.lock();
 
       // Clear the screen and draw the border and grid lines.
-      fillRect(canvasBD, 0, 0, WIDTH, HEIGHT, 0x0);
+      fillRect(canvasBD, 0, 0, WIDTH, HEIGHT, Color.BLACK);
       drawRect(canvasBD, BORDER/2, BORDER/2,
-               WIDTH - BORDER, HEIGHT - BORDER, 0xff00);
+               WIDTH - BORDER, HEIGHT - BORDER, Color.GREEN);
+      var lineColor:int = Color.lighten(Color.BLACK);
       for (var i:int = 0; i < NUMVISIBLEROWS; i++) {
         drawHLine(canvasBD, xPos, yPos + SQUAREWIDTH*i,
-                  SQUAREWIDTH*NUMCOLS, 0x888888);
+                  SQUAREWIDTH*NUMCOLS, lineColor);
         drawHLine(canvasBD, xPos, yPos + SQUAREWIDTH*(i + 1) - 1,
-                  SQUAREWIDTH*NUMCOLS, 0x888888);
+                  SQUAREWIDTH*NUMCOLS, lineColor);
       }
       for (i = 0; i < NUMCOLS; i++) {
         drawVLine(canvasBD, xPos + SQUAREWIDTH*i, yPos,
-                  SQUAREWIDTH*NUMVISIBLEROWS, 0x888888);
+                  SQUAREWIDTH*NUMVISIBLEROWS, lineColor);
         drawVLine(canvasBD, xPos + SQUAREWIDTH*(i + 1) - 1, yPos,
-                  SQUAREWIDTH*NUMVISIBLEROWS, 0x888888);
+                  SQUAREWIDTH*NUMVISIBLEROWS, lineColor);
       }
 
       // Draw the occupied squares on the board
@@ -143,12 +146,12 @@ package {
 
     private function drawBoardSquare(
         bd:BitmapData, i:int, j:int, c:int):void {
-      if (c == 0x0) {
+      i = i - (NUMROWS - NUMVISIBLEROWS);
+      if (i < 0 || c == 0x0) {
         return;
       }
-      i = i - (NUMROWS - NUMVISIBLEROWS);
       drawRect(bd, xPos + SQUAREWIDTH*j, yPos + SQUAREWIDTH*i,
-               SQUAREWIDTH, SQUAREWIDTH, 0xff0000);
+               SQUAREWIDTH, SQUAREWIDTH, Color.lighten(c));
       fillRect(bd, xPos + SQUAREWIDTH*j + 1, yPos + SQUAREWIDTH*i + 1,
                SQUAREWIDTH - 2, SQUAREWIDTH - 2, c);
     }
