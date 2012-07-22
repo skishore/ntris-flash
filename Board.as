@@ -29,6 +29,12 @@ package {
     private static const FRAMERATE:int = 60;
     private static const FRAMEDELAY:Number = 1000/FRAMERATE;
 
+    // Canvas bitmap data
+    private var xPos:int = SQUAREWIDTH;
+    private var yPos:int = SQUAREWIDTH;
+    private var canvasBD:BitmapData;
+    private var canvasBitmap:Bitmap;
+
     // Timing variables
     private var timer:Timer;
     private var curTime:int = 0;
@@ -37,22 +43,34 @@ package {
     private var sleepTime:int = 0;
     private var numFrames:int = 0;
     private var lastSecond:int = 0;
-    private var framerateText:TextField = new TextField();
+    private var framerateText:TextField;
 
-    // Canvas bitmap data
-    private var xPos:int = SQUAREWIDTH;
-    private var yPos:int = SQUAREWIDTH;
-    private var canvasBD:BitmapData;
-    private var canvasBitmap:Bitmap;
+    // Board data structures
+    private var data:Vector.<Vector.<int>>;
 
     public function Board() {
       canvasBD = new BitmapData(WIDTH, HEIGHT, false, 0xffffff);
       canvasBitmap = new Bitmap(canvasBD);
       addChild(canvasBitmap);
 
+      framerateText = new TextField();
       framerateText.x = BORDER + SQUAREWIDTH*NUMCOLS + SQUAREWIDTH/2;
       framerateText.y = BORDER;
       framerateText.textColor = 0xffffff;
+
+      data = new Vector.<Vector.<int>>();
+      for (var i:int = 0; i < NUMROWS; i++) {
+        data.push(new Vector.<int>());
+        for (var j:int = 0; j < NUMCOLS; j++) {
+          if (i > 12) {
+            data[i].push(0xff);
+          } else {
+            data[i].push(0x0);
+          }
+        }
+        data[i].fixed = true;
+      }
+      data.fixed = true;
 
       timer = new Timer(FRAMEDELAY, 1);
       timer.addEventListener(TimerEvent.TIMER, gameLoop);
@@ -111,31 +129,50 @@ package {
                   SQUAREWIDTH*NUMVISIBLEROWS, 0x888888);
       }
 
+      // Draw the occupied squares on the board
+      for (i = NUMROWS - NUMVISIBLEROWS; i < NUMROWS; i++) {
+        for (var j:int = 0; j < NUMCOLS; j++) {
+          drawBoardSquare(canvasBD, i, j, data[i][j]);
+        }
+      }
+
       drawTextField(canvasBD, framerateText);
 
       canvasBD.unlock();
     }
 
-    private function drawHLine(bd:BitmapData, x:int, y:int,
-                               w:int, c:int):void {
+    private function drawBoardSquare(
+        bd:BitmapData, i:int, j:int, c:int):void {
+      if (c == 0x0) {
+        return;
+      }
+      i = i - (NUMROWS - NUMVISIBLEROWS);
+      drawRect(bd, xPos + SQUAREWIDTH*j, yPos + SQUAREWIDTH*i,
+               SQUAREWIDTH, SQUAREWIDTH, 0xff0000);
+      fillRect(bd, xPos + SQUAREWIDTH*j + 1, yPos + SQUAREWIDTH*i + 1,
+               SQUAREWIDTH - 2, SQUAREWIDTH - 2, c);
+    }
+
+    private function drawHLine(
+        bd:BitmapData, x:int, y:int, w:int, c:int):void {
       bd.fillRect(new Rectangle(x, y, w, 1), c);
     }
 
-    private function drawVLine(bd:BitmapData, x:int, y:int,
-                               h:int, c:int):void {
+    private function drawVLine(
+        bd:BitmapData, x:int, y:int, h:int, c:int):void {
       bd.fillRect(new Rectangle(x, y, 1, h), c);
     }
 
-    private function drawRect(bd:BitmapData, x:int, y:int,
-                              w:int, h:int, c:int):void {
+    private function drawRect(
+        bd:BitmapData, x:int, y:int, w:int, h:int, c:int):void {
       drawHLine(bd, x, y, w, c);
       drawHLine(bd, x, y + h - 1, w, c);
       drawVLine(bd, x, y, h, c);
       drawVLine(bd, x + w - 1, y, h, c);
     }
 
-    private function fillRect(bd:BitmapData, x:int, y:int,
-                              w:int, h:int, c:int):void {
+    private function fillRect(
+        bd:BitmapData, x:int, y:int, w:int, h:int, c:int):void {
       bd.fillRect(new Rectangle(x, y, w, h), c);
     }
 
