@@ -119,6 +119,8 @@ package {
 
       // Clear the screen and draw the border and grid lines.
       fillRect(canvasBD, 0, 0, WIDTH, HEIGHT, Color.BLACK);
+      drawRect(canvasBD, BORDER/2 - 1, BORDER/2 - 1,
+               WIDTH - BORDER + 2, HEIGHT - BORDER + 2, Color.GREEN);
       drawRect(canvasBD, BORDER/2, BORDER/2,
                WIDTH - BORDER, HEIGHT - BORDER, Color.GREEN);
       var lineColor:int = Color.lighten(Color.BLACK);
