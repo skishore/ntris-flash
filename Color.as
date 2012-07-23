@@ -1,6 +1,6 @@
 package {
   public class Color {
-    public static const LAMBDA:Number = 0.32;
+    public static const LAMBDA:Number = 0.20;
 
     public static const BLACK:int = 0x00000000;
     public static const GRAY:int = 0x00ffffff;

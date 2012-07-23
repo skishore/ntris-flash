@@ -12,14 +12,29 @@ package {
 
     public var x:int;
     public var y:int;
+    public var angle:int;
     public var numSquares:int;
     public var squares:Vector.<Point>;
     public var height:int;
     public var rotates:Boolean;
     public var color:int;
 
-    public function Block() {
-      squares = new Vector.<Point>();
+    // The default Block constructor does NOT initalize the squares Vector.
+    // It should only be used when loading the block data; that is, it should
+    // never be called outside this class.
+    public function Block(i:int = -1) {
+      if (i < 0) {
+        return;
+      }
+
+      x = blockData[i].x;
+      y = blockData[i].y;
+      angle = 0;
+      numSquares = blockData[i].numSquares;
+      squares = Vector.<Point>(blockData[i].squares);
+      height = blockData[i].height;
+      rotates = blockData[i].rotates;
+      color = blockData[i].color;
     }
 
     public static function loadBlockData():void {
@@ -39,6 +54,7 @@ package {
         if (data.length != 2*block.numSquares + 4) {
           trace("Block " + (i - 1) + " is incorrectly formatted.");
         }
+        block.squares = new Vector.<Point>();
         for (var j:int = 0; j < block.numSquares; j++) {
           block.squares.push(new Point(data[2*j + 3], data[2*j + 4]));
         }
@@ -47,6 +63,8 @@ package {
         block.color = Color.colorCode(data[2*block.numSquares + 3]);
         block.height = calculateBlockHeight(block);
         block.rotates = doesBlockRotate(block);
+        // Translate the block down until it is just visible.
+        block.y += MAXBLOCKSIZE - block.height;
         blockData.push(block);
       }
 

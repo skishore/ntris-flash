@@ -31,6 +31,8 @@ package {
     // Game engine constants
     private static const FRAMERATE:int = 60;
     private static const FRAMEDELAY:Number = 1000/FRAMERATE;
+    private static const MAXFRAME:int = 3628800;
+    private static const GRAVITY:int = 60;
 
     // Canvas bitmap data
     private var xPos:int = SQUAREWIDTH;
@@ -40,15 +42,16 @@ package {
 
     // Timing variables
     private var timer:Timer;
-    private var curTime:int = 0;
     private var beforeTime:int = 0;
     private var afterTime:int = 0;
     private var sleepTime:int = 0;
     private var numFrames:int = 0;
     private var lastSecond:int = 0;
+    private var curFrame:int = 0;
     private var framerateText:TextField;
 
     // Board data structures
+    private var curBlock:Block;
     private var data:Vector.<Vector.<int>>;
 
     public function Board() {
@@ -62,16 +65,13 @@ package {
       framerateText.textColor = 0xffffff;
 
       Block.loadBlockData();
+      curBlock = null;
 
       data = new Vector.<Vector.<int>>();
       for (var i:int = 0; i < NUMROWS; i++) {
         data.push(new Vector.<int>());
         for (var j:int = 0; j < NUMCOLS; j++) {
-          if (i > 12) {
-            data[i].push(0xff);
-          } else {
-            data[i].push(0x0);
-          }
+          data[i].push(0x0);
         }
         data[i].fixed = true;
       }
@@ -110,10 +110,28 @@ package {
       e.updateAfterEvent();
     }
 
+//-------------------------------------------------------------------------
+// ntris game logic begins here!
+//-------------------------------------------------------------------------
     private function update():void {
-      curTime++;
+      curFrame = (curFrame + 1) % MAXFRAME;
+
+      if (curBlock == null) {
+        getNextBlock();
+        return;
+      } else if (curFrame % GRAVITY == 0) {
+        curBlock.y++;
+      }
     }
 
+    private function getNextBlock():void {
+      curBlock = new Block(1242);
+      curBlock.x += NUMCOLS/2;
+    }
+
+//-------------------------------------------------------------------------
+// Drawing code begins here!
+//-------------------------------------------------------------------------
     private function draw():void {
       canvasBD.lock();
 
@@ -137,16 +155,38 @@ package {
                   SQUAREWIDTH*NUMVISIBLEROWS, lineColor);
       }
 
-      // Draw the occupied squares on the board
+      // Draw the occupied squares on the board and the current block.
       for (i = NUMROWS - NUMVISIBLEROWS; i < NUMROWS; i++) {
         for (var j:int = 0; j < NUMCOLS; j++) {
           drawBoardSquare(canvasBD, i, j, data[i][j]);
         }
       }
+      drawBlock(canvasBD, curBlock);
 
       drawTextField(canvasBD, framerateText);
 
       canvasBD.unlock();
+    }
+
+    private function drawBlock(bd:BitmapData, block:Block):void {
+      if (block == null) {
+        return;
+      }
+
+      var point:Point = new Point();
+      for (var i:int = 0; i < block.numSquares; i++) {
+        if (block.angle % 2 == 0) {
+          point.x = block.x + (1 - (block.angle % 4))*block.squares[i].x;
+          point.y = block.y + (1 - (block.angle % 4))*block.squares[i].y;
+        } else {
+          point.x = block.x - (2 - (block.angle % 4))*block.squares[i].y;
+          point.y = block.y + (2 - (block.angle % 4))*block.squares[i].x;
+        }
+        if (point.x >= 0 && point.x < NUMCOLS &&
+            point.y >= 0 && point.y < NUMROWS) {
+          drawBoardSquare(bd, point.y, point.x, block.color);
+        }
+      }
     }
 
     private function drawBoardSquare(
