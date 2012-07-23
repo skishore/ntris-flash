@@ -1,5 +1,5 @@
-%.swf: *.as
-	mxmlc -static-link-runtime-shared-libraries $<
+Board.swf: *.as
+	mxmlc -static-link-runtime-shared-libraries Board.as
 
 all: Board.swf
 

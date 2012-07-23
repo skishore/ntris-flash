@@ -9,15 +9,16 @@ package {
   import flash.geom.Rectangle;
   import flash.text.TextField;
 
+  import Block;
   import Color;
 
   [SWF(width="367", height="546")]
 
   public class Board extends MovieClip {
     // Board size constants
-    private static const MAXBLOCKSIZE:int = 10;
     private static const NUMVISIBLEROWS:int = 24;
-    private static const NUMROWS:int = (NUMVISIBLEROWS + MAXBLOCKSIZE - 1);
+    private static const NUMROWS:int =
+        (NUMVISIBLEROWS + Block.MAXBLOCKSIZE - 1);
     private static const NUMCOLS:int = 12;
 
     // Screen size constants
@@ -59,6 +60,8 @@ package {
       framerateText.x = BORDER + SQUAREWIDTH*NUMCOLS + SQUAREWIDTH/2;
       framerateText.y = BORDER;
       framerateText.textColor = 0xffffff;
+
+      Block.loadBlockData();
 
       data = new Vector.<Vector.<int>>();
       for (var i:int = 0; i < NUMROWS; i++) {
