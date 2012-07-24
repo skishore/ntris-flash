@@ -1,5 +1,6 @@
 package {
   import flash.display.MovieClip;
+  import flash.events.KeyboardEvent;
   import flash.events.TimerEvent;
   import flash.utils.Timer;
   import flash.utils.getTimer;
@@ -11,10 +12,13 @@ package {
 
   import Block;
   import Color;
+  import Key;
+  import KeyRepeater;
+  import RepeatHandler;
 
   [SWF(width="367", height="546")]
 
-  public class Board extends MovieClip {
+  public class Board extends MovieClip implements RepeatHandler {
     // Board size constants
     private static const NUMVISIBLEROWS:int = 24;
     private static const NUMROWS:int =
@@ -33,6 +37,8 @@ package {
     private static const FRAMEDELAY:Number = 1000/FRAMERATE;
     private static const MAXFRAME:int = 3628800;
     private static const GRAVITY:int = 60;
+    private static const PAUSE:int = 120;
+    private static const REPEAT:int = 30;
 
     // Canvas bitmap data
     private var xPos:int = SQUAREWIDTH;
@@ -53,6 +59,10 @@ package {
     // Board data structures
     private var curBlock:Block;
     private var data:Vector.<Vector.<int>>;
+
+    // Auxiliary board variables
+    private var repeater:KeyRepeater;
+    private var moveDir:Vector.<int>;
 
     public function Board() {
       canvasBD = new BitmapData(WIDTH, HEIGHT, false, 0xffffff);
@@ -76,6 +86,11 @@ package {
         data[i].fixed = true;
       }
       data.fixed = true;
+
+      repeater = new KeyRepeater(PAUSE, REPEAT, this);
+      stage.addEventListener(KeyboardEvent.KEY_DOWN, repeater.keyPressed);
+      stage.addEventListener(KeyboardEvent.KEY_UP, repeater.keyReleased);
+      moveDir = new Vector.<int>();
 
       timer = new Timer(FRAMEDELAY, 1);
       timer.addEventListener(TimerEvent.TIMER, gameLoop);
@@ -110,17 +125,50 @@ package {
       e.updateAfterEvent();
     }
 
+    public function repeaterPress(key:int):void {
+      if (key == Key.MOVEUP || key == Key.MOVERIGHT ||
+          key == Key.MOVEDOWN || key == Key.MOVELEFT) {
+        if (moveDir.indexOf(key) < 0) {
+          moveDir.push(key);
+        }
+      }
+    }
+
+    public function repeaterRelease(key:int):void {
+      // Handle up and hold releases here.
+    }
+
 //-------------------------------------------------------------------------
 // ntris game logic begins here!
 //-------------------------------------------------------------------------
     private function update():void {
       curFrame = (curFrame + 1) % MAXFRAME;
 
+      moveDir.length = 0;
+      repeater.query();
+
       if (curBlock == null) {
         getNextBlock();
         return;
-      } else if (curFrame % GRAVITY == 0) {
-        curBlock.y++;
+      } else {
+        var v:Point = new Point();
+
+        if (curFrame % GRAVITY == 0) {
+          v.y += 1;
+        }
+
+        for (var i:int = 0; i < moveDir.length; i++) {
+          if (moveDir[i] == Key.MOVERIGHT) {
+            v.x += 1;
+          } else if (moveDir[i] == Key.MOVELEFT) {
+            v.x -= 1;
+          } else if (moveDir[i] == Key.MOVEDOWN) {
+            v.y += 1;
+          }
+        }
+
+        curBlock.x += v.x;
+        curBlock.y += v.y;
       }
     }
 
