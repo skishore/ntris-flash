@@ -153,7 +153,7 @@ package {
     }
 
     private function getNextBlock():void {
-      curBlock = new Block(1242);
+      curBlock = new Block(curFrame % 29);
       curBlock.x += COLS/2;
       curBlock.rowsFree = calculateRowsFree(curBlock);
     }
@@ -161,7 +161,7 @@ package {
     private function moveCurBlock():void {
       var shift:int = 0;
       var drop:Boolean = curFrame % GRAVITY == 0;
-      var moved:Boolean = true;
+      var moved:Boolean = false;
 
       for (var i:int = 0; i < keysFired.length; i++) {
         if (keysFired[i] == Key.MOVERIGHT) {
