@@ -230,12 +230,15 @@ package {
       for (var i:int = ROWS - 1; i >= 0; i--) {
         isRowFull = true;
         for (var j:int = 0; j < COLS; j++) {
-          if (data[i][j] != Color.BLACK) {
+          if (data[i][j] == Color.BLACK) {
             isRowFull = false;
           }
         }
 
         if (isRowFull) {
+          for (j = 0; j < COLS; j++) {
+            data[i][j] = Color.BLACK;
+          }
           numRowsCleared++;
         } else if (numRowsCleared > 0) {
           for (j = 0; j < COLS; j++) {
