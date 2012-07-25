@@ -287,7 +287,8 @@ package {
         }
         if (point.x >= 0 && point.x < COLS &&
             point.y >= 0 && point.y < ROWS) {
-          drawBoardSquare(bd, point.y, point.x, block.color);
+          drawBoardSquare(bd, point.y, point.x, Color.mix(block.color,
+              Color.WHITE, Color.LAMBDA*(1 - Color.LAMBDA)));
         }
       }
     }
