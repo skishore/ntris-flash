@@ -41,7 +41,7 @@ package {
     private static const GRAVITY:int = 60;
     public static const SHOVEAWAYS:int = 2;
     public static const LOCALSTICKFRAMES:int = 24;
-    public static const GLOBALSTICKFRAMES:int = 24;
+    public static const GLOBALSTICKFRAMES:int = 120;
 
     // Block overlap codes, in order of priority.
     private static const LEFTEDGE:int = 0;
@@ -148,7 +148,7 @@ package {
         getNextBlock();
         return;
       } else {
-        moveBlock(curBlock);
+        moveCurBlock();
       }
     }
 
@@ -158,7 +158,7 @@ package {
       curBlock.rowsFree = calculateRowsFree(curBlock);
     }
 
-    private function moveBlock(block:Block):void {
+    private function moveCurBlock():void {
       var shift:int = 0;
       var drop:Boolean = curFrame % GRAVITY == 0;
       var moved:Boolean = true;
@@ -174,21 +174,50 @@ package {
       }
 
       if (shift != 0) {
-        block.x += shift;
-        if (checkBlock(block) == OK) {
+        curBlock.x += shift;
+        if (checkBlock(curBlock) == OK) {
           moved = true;
         } else {
-          block.x -= shift;
+          curBlock.x -= shift;
         }
       }
 
       if (moved) {
-        block.rowsFree = calculateRowsFree(block);
+        curBlock.rowsFree = calculateRowsFree(curBlock);
+        curBlock.localStickFrames = LOCALSTICKFRAMES;
       }
 
-      if (drop && block.rowsFree > 0) {
-        block.y++;
-        block.rowsFree--;
+      if (curBlock.rowsFree > 0) {
+        curBlock.localStickFrames = LOCALSTICKFRAMES;
+        curBlock.globalStickFrames = GLOBALSTICKFRAMES;
+        if (drop) {
+          curBlock.y++;
+          curBlock.rowsFree--;
+        }
+      } else {
+        curBlock.globalStickFrames--;
+        if (!moved) {
+          curBlock.localStickFrames--;
+        }
+        if (curBlock.localStickFrames <= 0 || curBlock.globalStickFrames <= 0) {
+          placeBlock(curBlock);
+          curBlock = null;
+        }
+      }
+    }
+
+    private function placeBlock(block:Block):void {
+      var point:Point = new Point();
+
+      for (var i:int = 0; i < block.numSquares; i++) {
+        if (block.angle % 2 == 0) {
+          point.x = block.x + (1 - (block.angle % 4))*block.squares[i].x;
+          point.y = block.y + (1 - (block.angle % 4))*block.squares[i].y;
+        } else {
+          point.x = block.x - (2 - (block.angle % 4))*block.squares[i].y;
+          point.y = block.y + (2 - (block.angle % 4))*block.squares[i].x;
+        }
+        data[point.y][point.x] = block.color;
       }
     }
 
