@@ -105,22 +105,22 @@ package {
           lowest.x = block.squares[i].x;
         } else if (block.squares[i].x > highest.x) {
           highest.x = block.squares[i].x;
-        }   
+        }
 
         if (block.squares[i].y < lowest.y) {
           lowest.y = block.squares[i].y;
         } else if (block.squares[i].y > highest.y) {
           highest.y = block.squares[i].y;
-        }   
+        }
       }
 
       if (highest.x - lowest.x != highest.y - lowest.y) {
         return true;
       }
 
-      var rotated:Point = new Point(0, 0); 
+      var rotated:Point = new Point(0, 0);
       for (i = 0; i < block.numSquares; i++) {
-        rotated.x = lowest.x + highest.y - block.squares[i].y;  
+        rotated.x = lowest.x + highest.y - block.squares[i].y;
         rotated.y = lowest.y + block.squares[i].x - lowest.x;
         var found:Boolean = false;
         for (var j:int = 0; j < block.numSquares; j++) {

@@ -18,33 +18,33 @@ package {
   [SWF(width="367", height="546")]
 
   public class Board extends MovieClip {
-    // Board size constants
+    // Board size constants.
     private static const NUMVISIBLEROWS:int = 24;
     private static const NUMROWS:int =
         (NUMVISIBLEROWS + Block.MAXBLOCKSIZE - 1);
     private static const NUMCOLS:int = 12;
 
-    // Screen size constants
+    // Screen size constants.
     private static const SQUAREWIDTH:int = 21;
     private static const BORDER:int = SQUAREWIDTH;
     private static const SIDEBOARD:int = 7*SQUAREWIDTH/2;
     private static const WIDTH:int = SQUAREWIDTH*NUMCOLS + SIDEBOARD + 2*BORDER;
     private static const HEIGHT:int = SQUAREWIDTH*NUMVISIBLEROWS + 2*BORDER;
 
-    // Game engine constants
+    // Game engine constants.
     private static const FRAMERATE:int = 60;
     private static const FRAMEDELAY:int = 1000/FRAMERATE;
     private static const MAXFRAME:int = 3628800;
     private static const PAUSE:int = 120;
     private static const REPEAT:int = 30;
 
-    // Block movement constants, some of which are imported by Block
+    // Block movement constants, some of which are imported by Block.
     private static const GRAVITY:int = 60;
     public static const NUMSHOVEAWAYS:int = 2;
     public static const NUMLOCALSTICKFRAMES:int = 24;
     public static const NUMGLOBALSTICKFRAMES:int = 24;
 
-    // Block overlap codes, in order of priority
+    // Block overlap codes, in order of priority.
     private static const LEFTEDGE:int = 0;
     private static const RIGHTEDGE:int = 1;
     private static const TOPEDGE:int = 2;
@@ -52,13 +52,13 @@ package {
     private static const OVERLAP:int = 4;
     private static const OK:int = 5;
 
-    // Canvas bitmap data
+    // Canvas bitmap data.
     private var xPos:int = SQUAREWIDTH;
     private var yPos:int = SQUAREWIDTH;
     private var canvasBD:BitmapData;
     private var canvasBitmap:Bitmap;
 
-    // Timing variables
+    // Timing variables.
     private var timer:Timer;
     private var beforeTime:int = 0;
     private var afterTime:int = 0;
@@ -68,11 +68,11 @@ package {
     private var curFrame:int = 0;
     private var framerateText:TextField;
 
-    // Board data structures
+    // Board data structures.
     private var curBlock:Block;
     private var data:Vector.<Vector.<int>>;
 
-    // Auxiliary board variables
+    // Auxiliary board variables.
     private var repeater:KeyRepeater;
     private var keysFired:Vector.<int>;
 
