@@ -3,19 +3,16 @@ package {
   import flash.utils.getTimer;
 
   import Key;
-  import RepeatHandler;
 
   public class KeyRepeater {
     private var pause:int;
     private var repeat:int;
-    private var handler:RepeatHandler;
     private var isKeyDown:Vector.<Boolean>;
     private var nextFireTime:Vector.<int>;
    
-    public function KeyRepeater(p:int, r:int, h:RepeatHandler) {
+    public function KeyRepeater(p:int, r:int) {
       pause = p;
       repeat = r;
-      handler = h;
       
       isKeyDown = new Vector.<Boolean>();
       nextFireTime = new Vector.<int>();
@@ -41,19 +38,20 @@ package {
       }
     }
 
-    public function query():void {
+    public function query(keysFired:Vector.<int>):void {
+      keysFired.length = 0;
+
       var curTime:int = getTimer();
       for (var i:int = 0; i < Key.NUMKEYS; i++) {
         if (isKeyDown[i]) {
           if (nextFireTime[i] < 0) {
-            handler.repeaterPress(i);
+            keysFired.push(i);
             nextFireTime[i] = curTime + pause;
           } else if (curTime > nextFireTime[i]) {
-            handler.repeaterPress(i);
+            keysFired.push(i);
             nextFireTime[i] = curTime + repeat;
           }
         } else if (nextFireTime[i] > 0) {
-          handler.repeaterRelease(i);
           nextFireTime[i] = -1;
         }
       }

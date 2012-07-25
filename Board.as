@@ -14,11 +14,10 @@ package {
   import Color;
   import Key;
   import KeyRepeater;
-  import RepeatHandler;
 
   [SWF(width="367", height="546")]
 
-  public class Board extends MovieClip implements RepeatHandler {
+  public class Board extends MovieClip {
     // Board size constants
     private static const NUMVISIBLEROWS:int = 24;
     private static const NUMROWS:int =
@@ -62,7 +61,7 @@ package {
 
     // Auxiliary board variables
     private var repeater:KeyRepeater;
-    private var moveDir:Vector.<int>;
+    private var keysFired:Vector.<int>;
 
     public function Board() {
       canvasBD = new BitmapData(WIDTH, HEIGHT, false, 0xffffff);
@@ -87,10 +86,10 @@ package {
       }
       data.fixed = true;
 
-      repeater = new KeyRepeater(PAUSE, REPEAT, this);
+      repeater = new KeyRepeater(PAUSE, REPEAT);
       stage.addEventListener(KeyboardEvent.KEY_DOWN, repeater.keyPressed);
       stage.addEventListener(KeyboardEvent.KEY_UP, repeater.keyReleased);
-      moveDir = new Vector.<int>();
+      keysFired = new Vector.<int>();
 
       timer = new Timer(FRAMEDELAY, 1);
       timer.addEventListener(TimerEvent.TIMER, gameLoop);
@@ -125,27 +124,13 @@ package {
       e.updateAfterEvent();
     }
 
-    public function repeaterPress(key:int):void {
-      if (key == Key.MOVEUP || key == Key.MOVERIGHT ||
-          key == Key.MOVEDOWN || key == Key.MOVELEFT) {
-        if (moveDir.indexOf(key) < 0) {
-          moveDir.push(key);
-        }
-      }
-    }
-
-    public function repeaterRelease(key:int):void {
-      // Handle up and hold releases here.
-    }
-
 //-------------------------------------------------------------------------
 // ntris game logic begins here!
 //-------------------------------------------------------------------------
     private function update():void {
       curFrame = (curFrame + 1) % MAXFRAME;
 
-      moveDir.length = 0;
-      repeater.query();
+      repeater.query(keysFired);
 
       if (curBlock == null) {
         getNextBlock();
@@ -157,12 +142,12 @@ package {
           v.y += 1;
         }
 
-        for (var i:int = 0; i < moveDir.length; i++) {
-          if (moveDir[i] == Key.MOVERIGHT) {
+        for (var i:int = 0; i < keysFired.length; i++) {
+          if (keysFired[i] == Key.MOVERIGHT) {
             v.x += 1;
-          } else if (moveDir[i] == Key.MOVELEFT) {
+          } else if (keysFired[i] == Key.MOVELEFT) {
             v.x -= 1;
-          } else if (moveDir[i] == Key.MOVEDOWN) {
+          } else if (keysFired[i] == Key.MOVEDOWN) {
             v.y += 1;
           }
         }
