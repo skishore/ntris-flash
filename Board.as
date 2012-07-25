@@ -35,9 +35,22 @@ package {
     private static const FRAMERATE:int = 60;
     private static const FRAMEDELAY:int = 1000/FRAMERATE;
     private static const MAXFRAME:int = 3628800;
-    private static const GRAVITY:int = 60;
     private static const PAUSE:int = 120;
     private static const REPEAT:int = 30;
+
+    // Block movement constants, some of which are imported by Block
+    private static const GRAVITY:int = 60;
+    public static const NUMSHOVEAWAYS:int = 2;
+    public static const NUMLOCALSTICKFRAMES:int = 24;
+    public static const NUMGLOBALSTICKFRAMES:int = 24;
+
+    // Block overlap codes, in order of priority
+    private static const LEFTEDGE:int = 0;
+    private static const RIGHTEDGE:int = 1;
+    private static const TOPEDGE:int = 2;
+    private static const BOTTOMEDGE:int = 3;
+    private static const OVERLAP:int = 4;
+    private static const OK:int = 5;
 
     // Canvas bitmap data
     private var xPos:int = SQUAREWIDTH;
@@ -136,30 +149,88 @@ package {
         getNextBlock();
         return;
       } else {
-        var v:Point = new Point();
-
-        if (curFrame % GRAVITY == 0) {
-          v.y += 1;
-        }
-
-        for (var i:int = 0; i < keysFired.length; i++) {
-          if (keysFired[i] == Key.MOVERIGHT) {
-            v.x += 1;
-          } else if (keysFired[i] == Key.MOVELEFT) {
-            v.x -= 1;
-          } else if (keysFired[i] == Key.MOVEDOWN) {
-            v.y += 1;
-          }
-        }
-
-        curBlock.x += v.x;
-        curBlock.y += v.y;
+        moveBlock(curBlock);
       }
     }
 
     private function getNextBlock():void {
       curBlock = new Block(1242);
       curBlock.x += NUMCOLS/2;
+      curBlock.rowsFree = calculateRowsFree(curBlock);
+    }
+
+    private function moveBlock(block:Block):void {
+      var shift:int = 0;
+      var drop:Boolean = curFrame % GRAVITY == 0;
+      var moved:Boolean = true;
+
+      for (var i:int = 0; i < keysFired.length; i++) {
+        if (keysFired[i] == Key.MOVERIGHT) {
+          shift++;
+        } else if (keysFired[i] == Key.MOVELEFT) {
+          shift--;
+        } else if (keysFired[i] == Key.MOVEDOWN) {
+          drop = true;
+        }
+      }
+
+      if (shift != 0) {
+        block.x += shift;
+        if (checkBlock(block) == OK) {
+          moved = true;
+        } else {
+          block.x -= shift;
+        }
+      }
+
+      if (moved) {
+        block.rowsFree = calculateRowsFree(block);
+      }
+
+      if (drop && block.rowsFree > 0) {
+        block.y++;
+        block.rowsFree--;
+      }
+    }
+
+    private function calculateRowsFree(block:Block):int {
+      var rowsFree:int = 0;
+      while (checkBlock(block) == OK) {
+        rowsFree++;
+        block.y++;
+      }
+      block.y -= rowsFree;
+      return rowsFree - 1;
+    }
+
+    private function checkBlock(block:Block):int {
+      var point:Point = new Point();
+      var status:int = OK;
+
+      for (var i:int = 0; i < block.numSquares; i++) {
+        if (block.angle % 2 == 0) {
+          point.x = block.x + (1 - (block.angle % 4))*block.squares[i].x;
+          point.y = block.y + (1 - (block.angle % 4))*block.squares[i].y;
+        } else {
+          point.x = block.x - (2 - (block.angle % 4))*block.squares[i].y;
+          point.y = block.y + (2 - (block.angle % 4))*block.squares[i].x;
+        }
+
+        // Check for obstructions in order of priority.
+        if (point.x < 0) {
+          status = Math.min(LEFTEDGE, status);
+        } else if (point.x >= NUMCOLS) {
+          status = Math.min(RIGHTEDGE, status);
+        } else if (point.y < 0) {
+          status = Math.min(TOPEDGE, status);
+        } else if (point.y >= NUMROWS) {
+          status = Math.min(BOTTOMEDGE, status);
+        } else if (data[point.y][point.x] != Color.BLACK) {
+          status = Math.min(OVERLAP, status);
+        }
+      }
+
+      return status;
     }
 
 //-------------------------------------------------------------------------

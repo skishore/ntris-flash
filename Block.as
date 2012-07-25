@@ -1,4 +1,5 @@
 package {
+  import Board;
   import Color;
   import Point;
   import RawBlockData;
@@ -19,6 +20,11 @@ package {
     public var rotates:Boolean;
     public var color:int;
 
+    public var rowsFree:int;
+    public var shoveaways:int;
+    public var localStickFrames:int;
+    public var globalStickFrames:int;
+
     // The default Block constructor does NOT initalize the squares Vector.
     // It should only be used when loading the block data; that is, it should
     // never be called outside this class.
@@ -35,6 +41,10 @@ package {
       height = blockData[i].height;
       rotates = blockData[i].rotates;
       color = blockData[i].color;
+
+      shoveaways = Board.NUMSHOVEAWAYS;
+      localStickFrames = Board.NUMLOCALSTICKFRAMES;
+      globalStickFrames = Board.NUMGLOBALSTICKFRAMES;
     }
 
     public static function loadBlockData():void {
