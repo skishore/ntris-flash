@@ -305,16 +305,6 @@ package {
                SQUAREWIDTH - 2, SQUAREWIDTH - 2, c);
     }
 
-    private function drawHLine(
-        bd:BitmapData, x:int, y:int, w:int, c:int):void {
-      bd.fillRect(new Rectangle(x, y, w, 1), c);
-    }
-
-    private function drawVLine(
-        bd:BitmapData, x:int, y:int, h:int, c:int):void {
-      bd.fillRect(new Rectangle(x, y, 1, h), c);
-    }
-
     private function drawRect(
         bd:BitmapData, x:int, y:int, w:int, h:int, c:int):void {
       drawHLine(bd, x, y, w, c);
@@ -330,6 +320,16 @@ package {
 
     private function drawTextField(bd:BitmapData, tf:TextField):void {
       bd.draw(tf, new Matrix(1, 0, 0, 1, tf.x, tf.y));
+    }
+
+    private function drawHLine(
+        bd:BitmapData, x:int, y:int, w:int, c:int):void {
+      bd.fillRect(new Rectangle(x, y, w, 1), c);
+    }
+
+    private function drawVLine(
+        bd:BitmapData, x:int, y:int, h:int, c:int):void {
+      bd.fillRect(new Rectangle(x, y, 1, h), c);
     }
   }
 }
