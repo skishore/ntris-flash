@@ -19,17 +19,16 @@ package {
 
   public class Board extends MovieClip {
     // Board size constants.
-    private static const NUMVISIBLEROWS:int = 24;
-    private static const NUMROWS:int =
-        (NUMVISIBLEROWS + Block.MAXBLOCKSIZE - 1);
-    private static const NUMCOLS:int = 12;
+    private static const VISIBLEROWS:int = 24;
+    private static const ROWS:int = (VISIBLEROWS + Block.MAXBLOCKSIZE - 1);
+    private static const COLS:int = 12;
 
     // Screen size constants.
     private static const SQUAREWIDTH:int = 21;
     private static const BORDER:int = SQUAREWIDTH;
     private static const SIDEBOARD:int = 7*SQUAREWIDTH/2;
-    private static const WIDTH:int = SQUAREWIDTH*NUMCOLS + SIDEBOARD + 2*BORDER;
-    private static const HEIGHT:int = SQUAREWIDTH*NUMVISIBLEROWS + 2*BORDER;
+    private static const WIDTH:int = SQUAREWIDTH*COLS + SIDEBOARD + 2*BORDER;
+    private static const HEIGHT:int = SQUAREWIDTH*VISIBLEROWS + 2*BORDER;
 
     // Game engine constants.
     private static const FRAMERATE:int = 60;
@@ -40,9 +39,9 @@ package {
 
     // Block movement constants, some of which are imported by Block.
     private static const GRAVITY:int = 60;
-    public static const NUMSHOVEAWAYS:int = 2;
-    public static const NUMLOCALSTICKFRAMES:int = 24;
-    public static const NUMGLOBALSTICKFRAMES:int = 24;
+    public static const SHOVEAWAYS:int = 2;
+    public static const LOCALSTICKFRAMES:int = 24;
+    public static const GLOBALSTICKFRAMES:int = 24;
 
     // Block overlap codes, in order of priority.
     private static const LEFTEDGE:int = 0;
@@ -82,7 +81,7 @@ package {
       addChild(canvasBitmap);
 
       framerateText = new TextField();
-      framerateText.x = BORDER + SQUAREWIDTH*NUMCOLS + SQUAREWIDTH/2;
+      framerateText.x = BORDER + SQUAREWIDTH*COLS + SQUAREWIDTH/2;
       framerateText.y = BORDER;
       framerateText.textColor = 0xffffff;
 
@@ -90,9 +89,9 @@ package {
       curBlock = null;
 
       data = new Vector.<Vector.<int>>();
-      for (var i:int = 0; i < NUMROWS; i++) {
+      for (var i:int = 0; i < ROWS; i++) {
         data.push(new Vector.<int>());
-        for (var j:int = 0; j < NUMCOLS; j++) {
+        for (var j:int = 0; j < COLS; j++) {
           data[i].push(0x0);
         }
         data[i].fixed = true;
@@ -155,7 +154,7 @@ package {
 
     private function getNextBlock():void {
       curBlock = new Block(1242);
-      curBlock.x += NUMCOLS/2;
+      curBlock.x += COLS/2;
       curBlock.rowsFree = calculateRowsFree(curBlock);
     }
 
@@ -219,11 +218,11 @@ package {
         // Check for obstructions in order of priority.
         if (point.x < 0) {
           status = Math.min(LEFTEDGE, status);
-        } else if (point.x >= NUMCOLS) {
+        } else if (point.x >= COLS) {
           status = Math.min(RIGHTEDGE, status);
         } else if (point.y < 0) {
           status = Math.min(TOPEDGE, status);
-        } else if (point.y >= NUMROWS) {
+        } else if (point.y >= ROWS) {
           status = Math.min(BOTTOMEDGE, status);
         } else if (data[point.y][point.x] != Color.BLACK) {
           status = Math.min(OVERLAP, status);
@@ -246,22 +245,22 @@ package {
       drawRect(canvasBD, BORDER/2, BORDER/2,
                WIDTH - BORDER, HEIGHT - BORDER, Color.GREEN);
       var lineColor:int = Color.lighten(Color.BLACK);
-      for (var i:int = 0; i < NUMVISIBLEROWS; i++) {
+      for (var i:int = 0; i < VISIBLEROWS; i++) {
         drawHLine(canvasBD, xPos, yPos + SQUAREWIDTH*i,
-                  SQUAREWIDTH*NUMCOLS, lineColor);
+                  SQUAREWIDTH*COLS, lineColor);
         drawHLine(canvasBD, xPos, yPos + SQUAREWIDTH*(i + 1) - 1,
-                  SQUAREWIDTH*NUMCOLS, lineColor);
+                  SQUAREWIDTH*COLS, lineColor);
       }
-      for (i = 0; i < NUMCOLS; i++) {
+      for (i = 0; i < COLS; i++) {
         drawVLine(canvasBD, xPos + SQUAREWIDTH*i, yPos,
-                  SQUAREWIDTH*NUMVISIBLEROWS, lineColor);
+                  SQUAREWIDTH*VISIBLEROWS, lineColor);
         drawVLine(canvasBD, xPos + SQUAREWIDTH*(i + 1) - 1, yPos,
-                  SQUAREWIDTH*NUMVISIBLEROWS, lineColor);
+                  SQUAREWIDTH*VISIBLEROWS, lineColor);
       }
 
       // Draw the occupied squares on the board and the current block.
-      for (i = NUMROWS - NUMVISIBLEROWS; i < NUMROWS; i++) {
-        for (var j:int = 0; j < NUMCOLS; j++) {
+      for (i = ROWS - VISIBLEROWS; i < ROWS; i++) {
+        for (var j:int = 0; j < COLS; j++) {
           drawBoardSquare(canvasBD, i, j, data[i][j]);
         }
       }
@@ -286,8 +285,8 @@ package {
           point.x = block.x - (2 - (block.angle % 4))*block.squares[i].y;
           point.y = block.y + (2 - (block.angle % 4))*block.squares[i].x;
         }
-        if (point.x >= 0 && point.x < NUMCOLS &&
-            point.y >= 0 && point.y < NUMROWS) {
+        if (point.x >= 0 && point.x < COLS &&
+            point.y >= 0 && point.y < ROWS) {
           drawBoardSquare(bd, point.y, point.x, block.color);
         }
       }
@@ -295,7 +294,7 @@ package {
 
     private function drawBoardSquare(
         bd:BitmapData, i:int, j:int, c:int):void {
-      i = i - (NUMROWS - NUMVISIBLEROWS);
+      i = i - (ROWS - VISIBLEROWS);
       if (i < 0 || c == 0x0) {
         return;
       }

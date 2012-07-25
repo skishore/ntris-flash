@@ -6,8 +6,8 @@ package {
 
   public class Block {
     public static const MAXBLOCKSIZE:int = 10;
-    public static var NUMLEVELS:int;
-    public static var NUMBLOCKTYPES:Vector.<int>;
+    public static var LEVELS:int;
+    public static var BLOCKTYPES:Vector.<int>;
 
     private static var blockData:Vector.<Block> = new Vector.<Block>();
 
@@ -42,20 +42,20 @@ package {
       rotates = blockData[i].rotates;
       color = blockData[i].color;
 
-      shoveaways = Board.NUMSHOVEAWAYS;
-      localStickFrames = Board.NUMLOCALSTICKFRAMES;
-      globalStickFrames = Board.NUMGLOBALSTICKFRAMES;
+      shoveaways = Board.SHOVEAWAYS;
+      localStickFrames = Board.LOCALSTICKFRAMES;
+      globalStickFrames = Board.GLOBALSTICKFRAMES;
     }
 
     public static function loadBlockData():void {
-      NUMLEVELS = RawBlockData.data[0][0];
-      NUMBLOCKTYPES = Vector.<int>(RawBlockData.data[0].slice(1));
-      if (NUMBLOCKTYPES.length != NUMLEVELS) {
+      LEVELS = RawBlockData.data[0][0];
+      BLOCKTYPES = Vector.<int>(RawBlockData.data[0].slice(1));
+      if (BLOCKTYPES.length != LEVELS) {
         trace("Read an incorrect number of difficulty levels.");
       }
-      NUMBLOCKTYPES.fixed = true;
+      BLOCKTYPES.fixed = true;
 
-      for (var i:int = 1; i < NUMBLOCKTYPES[NUMLEVELS - 1] + 1; i++) {
+      for (var i:int = 1; i < BLOCKTYPES[LEVELS - 1] + 1; i++) {
         var data:Array = RawBlockData.data[i];
         var block:Block = new Block();
         block.x = data[0];
