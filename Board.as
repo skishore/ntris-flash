@@ -33,7 +33,7 @@ package {
 
     // Game engine constants
     private static const FRAMERATE:int = 60;
-    private static const FRAMEDELAY:Number = 1000/FRAMERATE;
+    private static const FRAMEDELAY:int = 1000/FRAMERATE;
     private static const MAXFRAME:int = 3628800;
     private static const GRAVITY:int = 60;
     private static const PAUSE:int = 120;

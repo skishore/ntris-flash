@@ -46,10 +46,10 @@ package {
         if (isKeyDown[i]) {
           if (nextFireTime[i] < 0) {
             keysFired.push(i);
-            nextFireTime[i] = curTime + pause;
+            nextFireTime[i] = int((curTime + pause)/repeat)*repeat;
           } else if (curTime > nextFireTime[i]) {
             keysFired.push(i);
-            nextFireTime[i] = curTime + repeat;
+            nextFireTime[i] += repeat;
           }
         } else if (nextFireTime[i] > 0) {
           nextFireTime[i] = -1;
