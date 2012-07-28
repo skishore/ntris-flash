@@ -48,7 +48,9 @@ package {
             keysFired.push(i);
             nextFireTime[i] = int((curTime + pause)/repeat)*repeat;
           } else if (curTime > nextFireTime[i]) {
-            keysFired.push(i);
+            if (Key.doesKeyRepeat[i]) {
+              keysFired.push(i);
+            }
             nextFireTime[i] += repeat;
           }
         } else if (nextFireTime[i] > 0) {

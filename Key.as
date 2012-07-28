@@ -7,6 +7,9 @@ package {
     public static const MOVEDOWN:int = 2;
     public static const MOVELEFT:int = 3;
 
+    public static const doesKeyRepeat:Vector.<Boolean> =
+        Vector.<Boolean>([false, true, true, true]);
+
     public static function translateKeyCode(keyCode:int):int {
       switch (keyCode) {
         case 38: return Key.MOVEUP;
