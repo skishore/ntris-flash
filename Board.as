@@ -161,6 +161,7 @@ package {
     private function moveCurBlock():void {
       var shift:int = 0;
       var drop:Boolean = curFrame % GRAVITY == 0;
+      var turn:int = 0;
       var moved:Boolean = false;
 
       for (var i:int = 0; i < keysFired.length; i++) {
@@ -170,6 +171,8 @@ package {
           shift--;
         } else if (keysFired[i] == Key.MOVEDOWN) {
           drop = true;
+        } else if (keysFired[i] == Key.MOVEUP) {
+          turn = 1;
         }
       }
 
@@ -179,6 +182,33 @@ package {
           moved = true;
         } else {
           curBlock.x -= shift;
+        }
+      }
+
+      if (turn != 0) {
+        curBlock.angle = (curBlock.angle + turn + 4) % 4;
+        var trans:Point = new Point();
+        while (checkBlock(curBlock) == LEFTEDGE) {
+          curBlock.x++;
+          trans.x++;
+        }
+        while (checkBlock(curBlock) == RIGHTEDGE) {
+          curBlock.x--;
+          trans.x--;
+        }
+        while (checkBlock(curBlock) == TOPEDGE) {
+          curBlock.y++;
+          trans.y++;
+        }
+        if (checkBlock(curBlock) == OK) {
+          moved = true;
+        } else if (curBlock.shoveaways > 0 && shoveaway(curBlock)) {
+          curBlock.shoveaways--;
+          moved = true;
+        } else {
+          curBlock.x -= trans.x;
+          curBlock.y -= trans.y;
+          curBlock.angle = (curBlock.angle - turn + 4) % 4;
         }
       }
 
@@ -204,6 +234,12 @@ package {
           curBlock = null;
         }
       }
+    }
+
+    // Tries to shove the block away from an obstructing square or from the lower
+    // edge. Returns true on success. Leaves the block unchanged on failure.
+    private function shoveaway(block:Block):Boolean {
+      return false;
     }
 
     private function placeBlock(block:Block):void {
