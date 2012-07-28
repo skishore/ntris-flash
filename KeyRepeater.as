@@ -42,19 +42,19 @@ package {
       keysFired.length = 0;
 
       var curTime:int = getTimer();
-      for (var i:int = 0; i < Key.NUMKEYS; i++) {
-        if (isKeyDown[i]) {
-          if (nextFireTime[i] < 0) {
-            keysFired.push(i);
-            nextFireTime[i] = int((curTime + pause)/repeat)*repeat;
-          } else if (curTime > nextFireTime[i]) {
-            if (Key.doesKeyRepeat[i]) {
-              keysFired.push(i);
+      for (var key:int = 0; key < Key.NUMKEYS; key++) {
+        if (isKeyDown[key]) {
+          if (nextFireTime[key] < 0) {
+            keysFired.push(key);
+            nextFireTime[key] = int((curTime + pause)/repeat)*repeat;
+          } else if (curTime > nextFireTime[key]) {
+            if (Key.doesKeyRepeat[key]) {
+              keysFired.push(key);
             }
-            nextFireTime[i] += repeat;
+            nextFireTime[key] += repeat;
           }
-        } else if (nextFireTime[i] > 0) {
-          nextFireTime[i] = -1;
+        } else if (nextFireTime[key] > 0) {
+          nextFireTime[key] = -1;
         }
       }
     }
