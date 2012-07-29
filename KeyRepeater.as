@@ -46,7 +46,7 @@ package {
         if (isKeyDown[key]) {
           if (nextFireTime[key] < 0) {
             keysFired.push(key);
-            nextFireTime[key] = int((curTime + pause)/repeat)*repeat;
+            nextFireTime[key] = int((curTime + pause)/repeat + 1)*repeat;
           } else if (curTime > nextFireTime[key]) {
             if (Key.doesKeyRepeat[key]) {
               keysFired.push(key);
