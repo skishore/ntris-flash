@@ -145,20 +145,24 @@ package {
       repeater.query(keysFired);
 
       if (curBlock == null) {
-        getNextBlock();
+        curBlock = getNextBlock();
         return;
       } else {
-        moveCurBlock();
+        if (moveBlock(curBlock)) {
+          curBlock = getNextBlock();
+        }
       }
     }
 
-    private function getNextBlock():void {
-      curBlock = new Block(curFrame % 29);
-      curBlock.x += COLS/2;
-      curBlock.rowsFree = calculateRowsFree(curBlock);
+    private function getNextBlock():Block {
+      var block:Block = new Block(curFrame % 29);
+      block.x += COLS/2;
+      block.rowsFree = calculateRowsFree(block);
+      return block;
     }
 
-    private function moveCurBlock():void {
+    // Returns true if this block was placed.
+    private function moveBlock(block:Block):Boolean {
       var shift:int = 0;
       var drop:Boolean = curFrame % GRAVITY == 0;
       var turn:int = 0;
@@ -177,68 +181,71 @@ package {
       }
 
       if (shift != 0) {
-        curBlock.x += shift;
-        if (checkBlock(curBlock) == OK) {
+        block.x += shift;
+        if (checkBlock(block) == OK) {
           moved = true;
         } else {
-          curBlock.x -= shift;
+          block.x -= shift;
         }
       }
 
       if (turn != 0) {
-        curBlock.angle = (curBlock.angle + turn + 4) % 4;
+        block.angle = (block.angle + turn + 4) % 4;
         var trans:Point = new Point();
-        while (checkBlock(curBlock) == LEFTEDGE) {
-          curBlock.x++;
+        while (checkBlock(block) == LEFTEDGE) {
+          block.x++;
           trans.x++;
         }
-        while (checkBlock(curBlock) == RIGHTEDGE) {
-          curBlock.x--;
+        while (checkBlock(block) == RIGHTEDGE) {
+          block.x--;
           trans.x--;
         }
-        while (checkBlock(curBlock) == TOPEDGE) {
-          curBlock.y++;
+        while (checkBlock(block) == TOPEDGE) {
+          block.y++;
           trans.y++;
         }
-        if (checkBlock(curBlock) == OK) {
+        if (checkBlock(block) == OK) {
           moved = true;
-        } else if (curBlock.shoveaways > 0 && shoveaway(curBlock)) {
-          curBlock.shoveaways--;
+        } else if (block.shoveaways > 0 && shoveaway(block)) {
+          block.shoveaways--;
           moved = true;
         } else {
-          curBlock.x -= trans.x;
-          curBlock.y -= trans.y;
-          curBlock.angle = (curBlock.angle - turn + 4) % 4;
+          block.x -= trans.x;
+          block.y -= trans.y;
+          block.angle = (block.angle - turn + 4) % 4;
         }
       }
 
       if (moved) {
-        curBlock.rowsFree = calculateRowsFree(curBlock);
-        curBlock.localStickFrames = LOCALSTICKFRAMES;
+        block.rowsFree = calculateRowsFree(block);
+        block.localStickFrames = LOCALSTICKFRAMES;
       }
 
-      if (curBlock.rowsFree > 0) {
-        curBlock.localStickFrames = LOCALSTICKFRAMES;
-        curBlock.globalStickFrames = GLOBALSTICKFRAMES;
+      if (block.rowsFree > 0) {
+        block.localStickFrames = LOCALSTICKFRAMES;
+        block.globalStickFrames = GLOBALSTICKFRAMES;
         if (drop) {
-          curBlock.y++;
-          curBlock.rowsFree--;
+          block.y++;
+          block.rowsFree--;
         }
       } else {
-        curBlock.globalStickFrames--;
+        block.globalStickFrames--;
         if (!moved) {
-          curBlock.localStickFrames--;
+          block.localStickFrames--;
         }
-        if (curBlock.localStickFrames <= 0 || curBlock.globalStickFrames <= 0) {
-          placeBlock(curBlock);
-          curBlock = null;
+        if (block.localStickFrames <= 0 || block.globalStickFrames <= 0) {
+          placeBlock(block);
+          return true;
         }
       }
+
+      return false;
     }
 
     // Tries to shove the block away from an obstructing square or from the lower
     // edge. Returns true on success. Leaves the block unchanged on failure.
     private function shoveaway(block:Block):Boolean {
+
       return false;
     }
 
