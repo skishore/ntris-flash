@@ -306,7 +306,7 @@ package {
           shift--;
         } else if (keysFired[i] == Key.DOWN) {
           drop = true;
-        } else if (keysFired[i] == Key.UP) {
+        } else if (keysFired[i] == Key.UP && block.rotates) {
           turn = 1;
         } else if (keysFired[i] == Key.DROP) {
           block.y += block.rowsFree;

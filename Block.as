@@ -134,7 +134,6 @@ package {
       }
 
       return false;
-
     }
   }
 }
