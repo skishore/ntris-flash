@@ -6,6 +6,7 @@ package {
   import flash.utils.getTimer;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
+  import flash.geom.ColorTransform;
   import flash.geom.Matrix;
   import flash.geom.Rectangle;
   import flash.text.TextField;
@@ -65,7 +66,9 @@ package {
     private var xPos:int = BORDER;
     private var yPos:int = BORDER;
     private var canvasBD:BitmapData;
-    private var canvasBitmap:Bitmap;
+    private var redTint:ColorTransform;
+    private var framerateText:TextField;
+    private var scoreText:TextField;
 
     // Timing variables.
     private var timer:Timer;
@@ -75,44 +78,24 @@ package {
     private var numFrames:int = 0;
     private var lastSecond:int = 0;
     private var curFrame:int = 0;
-    private var framerateText:TextField;
 
     // Board data structures.
+    private var data:Vector.<Vector.<int>>;
     private var curBlock:Block;
     private var preview:Vector.<int>;
-    private var previewFrame:int = 0;
-    private var previewOffset:int = 0;
-    private var data:Vector.<Vector.<int>>;
-    private var held:Boolean = false;
-    private var heldBlockType:int = -1;
-    private var score:int = 0;
-    private var scoreText:TextField;
+    private var previewFrame:int;
+    private var previewOffset:int;
+    private var held:Boolean;
+    private var heldBlockType:int;
+    private var score:int;
 
     // Auxiliary board variables.
     private var repeater:KeyRepeater;
     private var keysFired:Vector.<int>;
 
     public function Board() {
-      canvasBD = new BitmapData(WIDTH, HEIGHT, false, 0xffffff);
-      canvasBitmap = new Bitmap(canvasBD);
-      addChild(canvasBitmap);
-
-      framerateText = new TextField();
-      framerateText.x = BORDER + SQUAREWIDTH*COLS + SQUAREWIDTH/2;
-      framerateText.y = HEIGHT - BORDER - SQUAREWIDTH;
-      framerateText.textColor = 0xffffff;
-      scoreText = new TextField();
-      scoreText.x = BORDER + SQUAREWIDTH*COLS + 3*SQUAREWIDTH/4;
-      scoreText.y = HEIGHT - BORDER - 2*SQUAREWIDTH;
-      scoreText.width = SIDEBOARD - SQUAREWIDTH;
-      scoreText.textColor = 0xffffff;
-      var scoreFormat:TextFormat = new TextFormat();
-      scoreFormat.align = TextFormatAlign.RIGHT;
-      scoreText.defaultTextFormat = scoreFormat;
-
+      initGraphics();
       Block.loadBlockData();
-      curBlock = null;
-      preview = new Vector.<int>();
 
       data = new Vector.<Vector.<int>>();
       for (var i:int = 0; i < ROWS; i++) {
@@ -129,9 +112,44 @@ package {
       stage.addEventListener(KeyboardEvent.KEY_UP, repeater.keyReleased);
       keysFired = new Vector.<int>();
 
+      resetBoard();
+
       timer = new Timer(FRAMEDELAY, 1);
       timer.addEventListener(TimerEvent.TIMER, gameLoop);
       timer.start();
+    }
+
+    private function initGraphics():void {
+      canvasBD = new BitmapData(WIDTH, HEIGHT, false, 0xffffff);
+      addChild(new Bitmap(canvasBD));
+
+      redTint = new ColorTransform();
+      redTint.redMultiplier = 0.5;
+      redTint.redOffset = 128;
+
+      framerateText = new TextField();
+      framerateText.x = BORDER + SQUAREWIDTH*COLS + SQUAREWIDTH/2;
+      framerateText.y = HEIGHT - BORDER - SQUAREWIDTH;
+      framerateText.textColor = 0xffffff;
+
+      scoreText = new TextField();
+      scoreText.x = BORDER + SQUAREWIDTH*COLS + 3*SQUAREWIDTH/4;
+      scoreText.y = HEIGHT - BORDER - 2*SQUAREWIDTH;
+      scoreText.width = SIDEBOARD - SQUAREWIDTH;
+      scoreText.textColor = 0xffffff;
+      var scoreFormat:TextFormat = new TextFormat();
+      scoreFormat.align = TextFormatAlign.RIGHT;
+      scoreText.defaultTextFormat = scoreFormat;
+    }
+
+    private function resetBoard():void {
+      curBlock = null;
+      preview = new Vector.<int>();
+      previewFrame = 0;
+      previewOffset = 0;
+      held = false;
+      heldBlockType = -1;
+      score = 0;
     }
 
     private function gameLoop(e:TimerEvent):void {
