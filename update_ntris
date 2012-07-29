@@ -1,0 +1,6 @@
+#!/bin/bash
+echo "Remember to make first!"
+echo "Copying html to ntris.mit.edu..."
+scp ntris.html linerva.mit.edu:~/www/.
+echo "Copying swf to ntris.mit.edu..."
+scp Board.swf linerva.mit.edu:~/www/.
