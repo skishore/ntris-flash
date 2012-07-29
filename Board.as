@@ -9,6 +9,8 @@ package {
   import flash.geom.Matrix;
   import flash.geom.Rectangle;
   import flash.text.TextField;
+  import flash.text.TextFormat;
+  import flash.text.TextFormatAlign;
 
   import Block;
   import Color;
@@ -55,6 +57,10 @@ package {
     private static const PREVIEW:int = 5;
     private static const PREVIEWFRAMES:int = 3;
 
+    // Points given for each number of rows cleared.
+    private static const POINTS:Vector.<int> =
+        Vector.<int>([0, 1, 3, 7, 15, 31, 63, 79, 87, 91, 93]);
+
     // Canvas bitmap data.
     private var xPos:int = BORDER;
     private var yPos:int = BORDER;
@@ -79,6 +85,8 @@ package {
     private var data:Vector.<Vector.<int>>;
     private var held:Boolean = false;
     private var heldBlockType:int = -1;
+    private var score:int = 0;
+    private var scoreText:TextField;
 
     // Auxiliary board variables.
     private var repeater:KeyRepeater;
@@ -91,8 +99,16 @@ package {
 
       framerateText = new TextField();
       framerateText.x = BORDER + SQUAREWIDTH*COLS + SQUAREWIDTH/2;
-      framerateText.y = HEIGHT - 2*BORDER;
+      framerateText.y = HEIGHT - BORDER - SQUAREWIDTH;
       framerateText.textColor = 0xffffff;
+      scoreText = new TextField();
+      scoreText.x = BORDER + SQUAREWIDTH*COLS + 3*SQUAREWIDTH/4;
+      scoreText.y = HEIGHT - BORDER - 2*SQUAREWIDTH;
+      scoreText.width = SIDEBOARD - SQUAREWIDTH;
+      scoreText.textColor = 0xffffff;
+      var scoreFormat:TextFormat = new TextFormat();
+      scoreFormat.align = TextFormatAlign.RIGHT;
+      scoreText.defaultTextFormat = scoreFormat;
 
       Block.loadBlockData();
       curBlock = null;
@@ -317,9 +333,10 @@ package {
         data[point.y][point.x] = block.color;
       }
 
-      removeRows();
+      score += POINTS[removeRows()];
     }
 
+    // Returns the number of rows cleared.
     private function removeRows():int {
       var numRowsCleared:int = 0;
       var isRowFull:Boolean;
@@ -448,6 +465,8 @@ package {
                       yOffset, SQUAREWIDTH/2, lambda);
       }
 
+      scoreText.text = "" + score;
+      drawTextField(canvasBD, scoreText);
       drawTextField(canvasBD, framerateText);
 
       canvasBD.unlock();
