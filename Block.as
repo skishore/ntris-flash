@@ -7,7 +7,7 @@ package {
   public class Block {
     public static const MAXBLOCKSIZE:int = 10;
     public static var LEVELS:int;
-    public static var BLOCKTYPES:Vector.<int>;
+    public static var TYPES:Vector.<int>;
 
     public static var prototypes:Vector.<Block> = new Vector.<Block>();
 
@@ -51,13 +51,13 @@ package {
 
     public static function loadBlockData():void {
       LEVELS = RawBlockData.data[0][0];
-      BLOCKTYPES = Vector.<int>(RawBlockData.data[0].slice(1));
-      if (BLOCKTYPES.length != LEVELS) {
+      TYPES = Vector.<int>(RawBlockData.data[0].slice(1));
+      if (TYPES.length != LEVELS) {
         trace("Read an incorrect number of difficulty levels.");
       }
-      BLOCKTYPES.fixed = true;
+      TYPES.fixed = true;
 
-      for (var i:int = 1; i < BLOCKTYPES[LEVELS - 1] + 1; i++) {
+      for (var i:int = 1; i < TYPES[LEVELS - 1] + 1; i++) {
         var data:Array = RawBlockData.data[i];
         var block:Block = new Block();
         block.x = data[0];

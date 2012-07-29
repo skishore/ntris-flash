@@ -63,6 +63,12 @@ package {
     private static const PREVIEW:int = 5;
     private static const PREVIEWFRAMES:int = 3;
 
+    // Difficulty curve constants.
+    private static const LEVELINTERVAL:int = 60;
+    private static const MINR:Number = 0.1;
+    private static const MAXR:Number = 0.9;
+    private static const RINTERVAL:int = 480;
+
     // Points given for each number of rows cleared.
     private static const POINTS:Vector.<int> =
         Vector.<int>([0, 1, 3, 7, 15, 31, 63, 79, 87, 91, 93]);
@@ -204,6 +210,26 @@ package {
       e.updateAfterEvent();
     }
 
+    private function playTetrisGod():int {
+      var level:int = Block.LEVELS - 1;
+
+      // Calculate the ratio r between the probability of different levels.
+      var p:Number = Math.random();
+      var x:Number = 2.0*(score - RINTERVAL)/RINTERVAL;
+      var r:Number = (MAXR - MINR)*(x/Math.sqrt(x*x + 1) + 1)/2 + MINR;
+
+      // Run through the levels and compare p to a sigmoid for each level.
+      for (var i:int = 1; i < Block.LEVELS; i++) {
+        x = 2.0 * (score - i*LEVELINTERVAL)/LEVELINTERVAL;
+        if (p > Math.pow(r, i)*(x/Math.sqrt(x*x + 1) + 1)/2) {
+          level = i - 1;
+          break;
+        }
+      }
+
+      return Math.floor(Math.random()*Block.TYPES[level]);
+    }
+
 //-------------------------------------------------------------------------
 // ntris game logic begins here!
 //-------------------------------------------------------------------------
@@ -250,7 +276,7 @@ package {
       if (type < 0) {
         var blocksNeeded:int = PREVIEW - preview.length + 1;
         for (var i:int = 0; i < blocksNeeded; i++) {
-          preview.push(curFrame % 29);
+          preview.push(playTetrisGod());
         }
         previewFrame = PREVIEWFRAMES;
         previewOffset += (Block.prototypes[preview[0]].height + 2)*SQUAREWIDTH/2;
