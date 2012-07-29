@@ -206,7 +206,7 @@ package {
         }
         if (checkBlock(block) == OK) {
           moved = true;
-        } else if (block.shoveaways > 0 && shoveaway(block)) {
+        } else if (block.shoveaways > 0 && shoveaway(block, shift)) {
           block.shoveaways--;
           moved = true;
         } else {
@@ -244,8 +244,27 @@ package {
 
     // Tries to shove the block away from an obstructing square or from the lower
     // edge. Returns true on success. Leaves the block unchanged on failure.
-    private function shoveaway(block:Block):Boolean {
+    private function shoveaway(block:Block, hint:int = 0):Boolean {
+      // In the absence of a hint, prefer to shove left over shoving right.
+      hint = (hint > 0 ? 1 : -1);
 
+      for (var i:int = 0; i < 4; i++) {
+        for (var j:int = 0; j < 3; j++) {
+          if (checkBlock(block) == OK) {
+            return true;
+          }
+          block.x += (j == 1 ? -2*hint : hint);
+        }
+        if (i == 0) {
+          block.y++;
+        } else if (i == -1) {
+          block.y -= 2;
+        } else {
+          block.y--;
+        }
+      }
+
+      block.y += 3;
       return false;
     }
 
