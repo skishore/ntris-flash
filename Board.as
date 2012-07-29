@@ -525,7 +525,7 @@ package {
       drawBlock(canvasBD, curBlock, true);
       drawBlock(canvasBD, curBlock);
 
-      // Draw the preview list.
+      // Draw the GUI, starting with the preview list.
       var xOffset:int = xPos + SQUAREWIDTH*COLS + SIDEBOARD/2;
       var yOffset:int = yPos + SQUAREWIDTH + previewOffset;
       for (i = 0; i < preview.length; i++) {
@@ -540,7 +540,7 @@ package {
       var lambda:Number = (held ? 3*Color.LAMBDA : 0.0);
       drawRect(canvasBD, xOffset, yOffset, 5*SQUAREWIDTH/2, 4*SQUAREWIDTH,
                Color.mix(Color.WHITE, Color.BLACK, lambda));
-      drawRect(canvasBD, xOffset + 1, yOffset + 1, 5*SQUAREWIDTH/2 - 2,
+      fillRect(canvasBD, xOffset + 1, yOffset + 1, 5*SQUAREWIDTH/2 - 2,
                4*SQUAREWIDTH - 2, Color.BLACK);
       if (heldBlockType >= 0) {
         xOffset = xPos + SQUAREWIDTH*COLS + SIDEBOARD/2;
