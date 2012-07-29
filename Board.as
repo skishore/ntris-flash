@@ -51,6 +51,10 @@ package {
     private static const OVERLAP:int = 4;
     private static const OK:int = 5;
 
+    // Preview size and animation speed.
+    private static const PREVIEW:int = 5;
+    private static const PREVIEWFRAMES:int = 3;
+
     // Canvas bitmap data.
     private var xPos:int = SQUAREWIDTH;
     private var yPos:int = SQUAREWIDTH;
@@ -69,6 +73,9 @@ package {
 
     // Board data structures.
     private var curBlock:Block;
+    private var preview:Vector.<int>;
+    private var previewFrame:int = 0;
+    private var previewOffset:int = 0;
     private var data:Vector.<Vector.<int>>;
 
     // Auxiliary board variables.
@@ -82,11 +89,12 @@ package {
 
       framerateText = new TextField();
       framerateText.x = BORDER + SQUAREWIDTH*COLS + SQUAREWIDTH/2;
-      framerateText.y = BORDER;
+      framerateText.y = HEIGHT - 2*BORDER;
       framerateText.textColor = 0xffffff;
 
       Block.loadBlockData();
       curBlock = null;
+      preview = new Vector.<int>();
 
       data = new Vector.<Vector.<int>>();
       for (var i:int = 0; i < ROWS; i++) {
@@ -152,11 +160,24 @@ package {
           curBlock = getNextBlock();
         }
       }
+
+      if (previewFrame > 0) {
+        previewFrame--;
+        previewOffset = previewOffset*previewFrame/(previewFrame + 1);
+      }
     }
 
     private function getNextBlock():Block {
-      var block:Block = new Block(curFrame % 29);
+      var blocksNeeded:int = PREVIEW - preview.length + 1;
+      for (var i:int = 0; i < blocksNeeded; i++) {
+        preview.push(curFrame % 29);
+      }
+
+      previewFrame = PREVIEWFRAMES;
+      previewOffset += (Block.prototypes[preview[0]].height + 2)*SQUAREWIDTH/2;
+      var block:Block = new Block(preview.shift());
       block.x += COLS/2;
+      block.y += Block.MAXBLOCKSIZE - block.height;
       block.rowsFree = calculateRowsFree(block);
       return block;
     }
@@ -359,6 +380,7 @@ package {
 
 //-------------------------------------------------------------------------
 // Drawing code begins here!
+// None of these drawing functions should modify ANY state.
 //-------------------------------------------------------------------------
     private function draw():void {
       canvasBD.lock();
@@ -392,6 +414,14 @@ package {
       drawBlock(canvasBD, curBlock, true);
       drawBlock(canvasBD, curBlock);
 
+      // Draw the GUI, including the preview, hold, score, and FPS.
+      var xOffset:int = xPos + SQUAREWIDTH*COLS + SIDEBOARD/2;
+      var yOffset:int = yPos + SQUAREWIDTH + previewOffset;
+      for (i = 0; i < preview.length; i++) {
+        drawFreeBlock(canvasBD, Block.prototypes[preview[i]], xOffset, yOffset,
+                      SQUAREWIDTH/2, (i == 0 ? -Color.LAMBDA : 2*Color.LAMBDA));
+        yOffset += (Block.prototypes[preview[i]].height + 2)*SQUAREWIDTH/2;
+      }
       drawTextField(canvasBD, framerateText);
 
       canvasBD.unlock();
@@ -399,6 +429,7 @@ package {
 
     private function drawBlock(
         bd:BitmapData, block:Block, shadow:Boolean=false):void {
+      // drawBlock can be called with curBlock when it is null.
       if (block == null) {
         return;
       }
@@ -419,6 +450,21 @@ package {
           drawBoardSquare(bd, point.y, point.x, Color.mix(block.color,
               Color.WHITE, Color.LAMBDA*(1 - Color.LAMBDA)));
         }
+      }
+    }
+
+    private function drawFreeBlock(
+        bd:BitmapData, block:Block, x:int, y:int, w:int, lambda:Number):void {
+      var point:Point = new Point();
+      var color:int;
+      for (var i:int = 0; i < block.numSquares; i++) {
+        point.x = x + w*(block.x + block.squares[i].x);
+        point.y = y + w*(block.y + block.squares[i].y);
+        color = Color.mix(block.color, Color.BLACK, lambda);
+        if ((block.squares[i].x + block.squares[i].y) % 2) {
+          color = Color.mix(color, Color.BLACK, 0.6*Color.LAMBDA);
+        }
+        fillRect(bd, point.x, point.y, w, w, color);
       }
     }
 

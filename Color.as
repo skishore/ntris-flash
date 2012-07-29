@@ -40,7 +40,8 @@ package {
       var r:int = (1 - lambda)*(c1 >> 16 & 0xff) + lambda*(c2 >> 16 & 0xff);
       var g:int = (1 - lambda)*(c1 >> 8 & 0xff) + lambda*(c2 >> 8 & 0xff);
       var b:int = (1 - lambda)*(c1 & 0xff) + lambda*(c2 & 0xff);
-      return (r << 16) + (g << 8) + b;
+      return (Math.min(r, 255) << 16) +
+             (Math.min(g, 255) << 8) + Math.min(b, 255);
     }
 
     public static function lighten(c:int):int {

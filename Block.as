@@ -9,7 +9,7 @@ package {
     public static var LEVELS:int;
     public static var BLOCKTYPES:Vector.<int>;
 
-    private static var blockData:Vector.<Block> = new Vector.<Block>();
+    public static var prototypes:Vector.<Block> = new Vector.<Block>();
 
     public var x:int;
     public var y:int;
@@ -19,6 +19,7 @@ package {
     public var height:int;
     public var rotates:Boolean;
     public var color:int;
+    public var type:int;
 
     public var rowsFree:int;
     public var shoveaways:int;
@@ -33,18 +34,19 @@ package {
         return;
       }
 
-      x = blockData[i].x;
-      y = blockData[i].y;
+      x = prototypes[i].x;
+      y = prototypes[i].y;
       angle = 0;
-      numSquares = blockData[i].numSquares;
-      squares = Vector.<Point>(blockData[i].squares);
-      height = blockData[i].height;
-      rotates = blockData[i].rotates;
-      color = blockData[i].color;
+      numSquares = prototypes[i].numSquares;
+      squares = Vector.<Point>(prototypes[i].squares);
+      height = prototypes[i].height;
+      rotates = prototypes[i].rotates;
+      color = prototypes[i].color;
 
       shoveaways = Board.SHOVEAWAYS;
       localStickFrames = Board.LOCALSTICKFRAMES;
       globalStickFrames = Board.GLOBALSTICKFRAMES;
+      type = i;
     }
 
     public static function loadBlockData():void {
@@ -73,12 +75,10 @@ package {
         block.color = Color.colorCode(data[2*block.numSquares + 3]);
         block.height = calculateBlockHeight(block);
         block.rotates = doesBlockRotate(block);
-        // Translate the block down until it is just visible.
-        block.y += MAXBLOCKSIZE - block.height;
-        blockData.push(block);
+        prototypes.push(block);
       }
 
-      blockData.fixed = true;
+      prototypes.fixed = true;
     }
 
     private static function calculateBlockHeight(block:Block):int {
