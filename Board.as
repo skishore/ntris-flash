@@ -77,6 +77,8 @@ package {
     private var previewFrame:int = 0;
     private var previewOffset:int = 0;
     private var data:Vector.<Vector.<int>>;
+    private var held:Boolean = false;
+    private var heldBlockType:int = -1;
 
     // Auxiliary board variables.
     private var repeater:KeyRepeater;
@@ -149,16 +151,12 @@ package {
 //-------------------------------------------------------------------------
     private function update():void {
       curFrame = (curFrame + 1) % MAXFRAME;
-
       repeater.query(keysFired);
 
-      if (curBlock == null) {
+      if (!held && keysFired.indexOf(Key.HOLD) >= 0) {
+        curBlock = getNextBlock(curBlock);
+      } else if (curBlock == null || moveBlock(curBlock)) {
         curBlock = getNextBlock();
-        return;
-      } else {
-        if (moveBlock(curBlock)) {
-          curBlock = getNextBlock();
-        }
       }
 
       if (previewFrame > 0) {
@@ -167,18 +165,30 @@ package {
       }
     }
 
-    private function getNextBlock():Block {
-      var blocksNeeded:int = PREVIEW - preview.length + 1;
-      for (var i:int = 0; i < blocksNeeded; i++) {
-        preview.push(curFrame % 29);
+    // Returns the next block. If swap is not null, holds the swapped block
+    // and returns the currently held block.
+    private function getNextBlock(swap:Block=null):Block {
+      var type:int = -1;
+      if (swap != null) {
+        type = heldBlockType;
+        heldBlockType = swap.type;
+      }
+      if (type < 0) {
+        var blocksNeeded:int = PREVIEW - preview.length + 1;
+        for (var i:int = 0; i < blocksNeeded; i++) {
+          preview.push(curFrame % 29);
+        }
+        previewFrame = PREVIEWFRAMES;
+        previewOffset += (Block.prototypes[preview[0]].height + 2)*SQUAREWIDTH/2;
+        type = preview.shift();
       }
 
-      previewFrame = PREVIEWFRAMES;
-      previewOffset += (Block.prototypes[preview[0]].height + 2)*SQUAREWIDTH/2;
-      var block:Block = new Block(preview.shift());
+      var block:Block = new Block(type);
       block.x += COLS/2;
       block.y += Block.MAXBLOCKSIZE - block.height;
       block.rowsFree = calculateRowsFree(block);
+
+      held = (swap != null);
       return block;
     }
 
@@ -198,7 +208,7 @@ package {
           drop = true;
         } else if (keysFired[i] == Key.UP) {
           turn = 1;
-        } else if (keysFired[i] == Key.SPACE) {
+        } else if (keysFired[i] == Key.DROP) {
           block.y += block.rowsFree;
           placeBlock(block);
           return true;
