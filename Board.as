@@ -428,10 +428,25 @@ package {
       if (i < 0 || i >= VISIBLEROWS || j < 0 || j >= COLS || c == 0x0) {
         return;
       }
-      drawRect(bd, xPos + SQUAREWIDTH*j, yPos + SQUAREWIDTH*i,
-               SQUAREWIDTH, SQUAREWIDTH, Color.lighten(c));
-      fillRect(bd, xPos + SQUAREWIDTH*j + 1, yPos + SQUAREWIDTH*i + 1,
-               SQUAREWIDTH - 2, SQUAREWIDTH - 2, c);
+      if (shadow) {
+        for (var a:int = 0; a < 2*SQUAREWIDTH - 1; a++) {
+          if ((SQUAREWIDTH*(i + j) + a) % 4 == 0) {
+            if (a < SQUAREWIDTH) {
+              draw45DegLine(bd, xPos + SQUAREWIDTH*j,
+                            yPos + SQUAREWIDTH*i + a, a + 1, c);
+            } else {
+              draw45DegLine(bd, xPos + SQUAREWIDTH*(j - 1) + a + 1,
+                            yPos + SQUAREWIDTH*(i + 1) - 1,
+                            2*SQUAREWIDTH - a - 1, c);
+            }
+          }
+        }
+      } else {
+        drawRect(bd, xPos + SQUAREWIDTH*j, yPos + SQUAREWIDTH*i,
+                 SQUAREWIDTH, SQUAREWIDTH, Color.lighten(c));
+        fillRect(bd, xPos + SQUAREWIDTH*j + 1, yPos + SQUAREWIDTH*i + 1,
+                 SQUAREWIDTH - 2, SQUAREWIDTH - 2, c);
+      }
     }
 
     private function drawRect(
@@ -459,6 +474,13 @@ package {
     private function drawVLine(
         bd:BitmapData, x:int, y:int, h:int, c:int):void {
       bd.fillRect(new Rectangle(x, y, 1, h), c);
+    }
+
+    private function draw45DegLine(
+        bd:BitmapData, x:int, y:int, l:int, c:int):void {
+      for (var i:int = 0; i < l; i++) {
+        bd.setPixel(x + i, y - i, c);
+      }
     }
   }
 }
