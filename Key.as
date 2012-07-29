@@ -1,21 +1,23 @@
 package {
   public class Key {
-    public static const NUMKEYS:int = 4;
+    public static const NUMKEYS:int = 5;
 
-    public static const MOVEUP:int = 0;
-    public static const MOVERIGHT:int = 1;
-    public static const MOVEDOWN:int = 2;
-    public static const MOVELEFT:int = 3;
+    public static const UP:int = 0;
+    public static const RIGHT:int = 1;
+    public static const DOWN:int = 2;
+    public static const LEFT:int = 3;
+    public static const SPACE:int = 4;
 
     public static const doesKeyRepeat:Vector.<Boolean> =
-        Vector.<Boolean>([false, true, true, true]);
+        Vector.<Boolean>([false, true, true, true, false]);
 
     public static function translateKeyCode(keyCode:int):int {
       switch (keyCode) {
-        case 38: return Key.MOVEUP;
-        case 39: return Key.MOVERIGHT;
-        case 40: return Key.MOVEDOWN;
-        case 37: return Key.MOVELEFT;
+        case 38: return UP;
+        case 39: return RIGHT;
+        case 40: return DOWN;
+        case 37: return LEFT;
+        case 32: return SPACE;
         default: return -1;
       }
     }

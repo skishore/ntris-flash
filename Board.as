@@ -169,14 +169,18 @@ package {
       var moved:Boolean = false;
 
       for (var i:int = 0; i < keysFired.length; i++) {
-        if (keysFired[i] == Key.MOVERIGHT) {
+        if (keysFired[i] == Key.RIGHT) {
           shift++;
-        } else if (keysFired[i] == Key.MOVELEFT) {
+        } else if (keysFired[i] == Key.LEFT) {
           shift--;
-        } else if (keysFired[i] == Key.MOVEDOWN) {
+        } else if (keysFired[i] == Key.DOWN) {
           drop = true;
-        } else if (keysFired[i] == Key.MOVEUP) {
+        } else if (keysFired[i] == Key.UP) {
           turn = 1;
+        } else if (keysFired[i] == Key.SPACE) {
+          block.y += block.rowsFree;
+          placeBlock(block);
+          return true;
         }
       }
 
