@@ -56,8 +56,8 @@ package {
     private static const PREVIEWFRAMES:int = 3;
 
     // Canvas bitmap data.
-    private var xPos:int = SQUAREWIDTH;
-    private var yPos:int = SQUAREWIDTH;
+    private var xPos:int = BORDER;
+    private var yPos:int = BORDER;
     private var canvasBD:BitmapData;
     private var canvasBitmap:Bitmap;
 
@@ -424,7 +424,7 @@ package {
       drawBlock(canvasBD, curBlock, true);
       drawBlock(canvasBD, curBlock);
 
-      // Draw the GUI, including the preview, hold, score, and FPS.
+      // Draw the preview list.
       var xOffset:int = xPos + SQUAREWIDTH*COLS + SIDEBOARD/2;
       var yOffset:int = yPos + SQUAREWIDTH + previewOffset;
       for (i = 0; i < preview.length; i++) {
@@ -432,6 +432,22 @@ package {
                       SQUAREWIDTH/2, (i == 0 ? -Color.LAMBDA : 2*Color.LAMBDA));
         yOffset += (Block.prototypes[preview[i]].height + 2)*SQUAREWIDTH/2;
       }
+
+      // Draw the held block.
+      xOffset = xPos + SQUAREWIDTH*COLS + 3*SQUAREWIDTH/4;
+      yOffset = yPos + 5*SQUAREWIDTH/2*(PREVIEW + 2) + 1;
+      var lambda:Number = (held ? 3*Color.LAMBDA : 0.0);
+      drawRect(canvasBD, xOffset, yOffset, 5*SQUAREWIDTH/2, 4*SQUAREWIDTH,
+               Color.mix(Color.WHITE, Color.BLACK, lambda));
+      drawRect(canvasBD, xOffset + 1, yOffset + 1, 5*SQUAREWIDTH/2 - 2,
+               4*SQUAREWIDTH - 2, Color.BLACK);
+      if (heldBlockType >= 0) {
+        xOffset = xPos + SQUAREWIDTH*COLS + SIDEBOARD/2;
+        yOffset += SQUAREWIDTH*(8 - Block.prototypes[heldBlockType].height)/4;
+        drawFreeBlock(canvasBD, Block.prototypes[heldBlockType], xOffset,
+                      yOffset, SQUAREWIDTH/2, lambda);
+      }
+
       drawTextField(canvasBD, framerateText);
 
       canvasBD.unlock();
