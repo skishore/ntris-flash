@@ -33,6 +33,11 @@ package {
     private static const WIDTH:int = SQUAREWIDTH*COLS + SIDEBOARD + 2*BORDER;
     private static const HEIGHT:int = SQUAREWIDTH*VISIBLEROWS + 2*BORDER;
 
+    // Game states.
+    private static const PLAYING:int = 0;
+    private static const PAUSED:int = 1;
+    private static const GAMEOVER:int = 2;
+
     // Game engine constants.
     private static const FRAMERATE:int = 60;
     private static const FRAMEDELAY:int = 1000/FRAMERATE;
@@ -88,6 +93,7 @@ package {
     private var held:Boolean;
     private var heldBlockType:int;
     private var score:int;
+    private var state:int;
 
     // Auxiliary board variables.
     private var repeater:KeyRepeater;
@@ -99,10 +105,7 @@ package {
 
       data = new Vector.<Vector.<int>>();
       for (var i:int = 0; i < ROWS; i++) {
-        data.push(new Vector.<int>());
-        for (var j:int = 0; j < COLS; j++) {
-          data[i].push(0x0);
-        }
+        data.push(new Vector.<int>(COLS));
         data[i].fixed = true;
       }
       data.fixed = true;
@@ -143,6 +146,12 @@ package {
     }
 
     private function resetBoard():void {
+      for (var i:int = 0; i < ROWS; i++) {
+        for (var j:int = 0; j < COLS; j++) {
+          data[i][j] = 0x0;
+        }
+      }
+
       curBlock = null;
       preview = new Vector.<int>();
       previewFrame = 0;
@@ -150,6 +159,7 @@ package {
       held = false;
       heldBlockType = -1;
       score = 0;
+      state = PLAYING;
     }
 
     private function gameLoop(e:TimerEvent):void {
@@ -186,6 +196,16 @@ package {
     private function update():void {
       curFrame = (curFrame + 1) % MAXFRAME;
       repeater.query(keysFired);
+
+      if (state == GAMEOVER) {
+        if (keysFired.indexOf(Key.PAUSE) >= 0) {
+          resetBoard();
+        }
+        return;
+      } else if (curBlock != null && curBlock.rowsFree < 0) {
+        state = GAMEOVER;
+        return;
+      }
 
       if (!held && keysFired.indexOf(Key.HOLD) >= 0) {
         curBlock = getNextBlock(curBlock);
@@ -483,9 +503,13 @@ package {
                       yOffset, SQUAREWIDTH/2, lambda);
       }
 
+      // Draw the score and framerate. If the game is paused or over, draw text.
       scoreText.text = "" + score;
       drawTextField(canvasBD, scoreText);
       drawTextField(canvasBD, framerateText);
+      if (state == GAMEOVER) {
+        canvasBD.colorTransform(new Rectangle(0, 0, WIDTH, HEIGHT), redTint);
+      }
 
       canvasBD.unlock();
     }
