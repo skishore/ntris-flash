@@ -389,6 +389,7 @@ package {
           drawBoardSquare(canvasBD, i, j, data[i][j]);
         }
       }
+      drawBlock(canvasBD, curBlock, true);
       drawBlock(canvasBD, curBlock);
 
       drawTextField(canvasBD, framerateText);
@@ -396,7 +397,8 @@ package {
       canvasBD.unlock();
     }
 
-    private function drawBlock(bd:BitmapData, block:Block):void {
+    private function drawBlock(
+        bd:BitmapData, block:Block, shadow:Boolean=false):void {
       if (block == null) {
         return;
       }
@@ -410,8 +412,10 @@ package {
           point.x = block.x - (2 - (block.angle % 4))*block.squares[i].y;
           point.y = block.y + (2 - (block.angle % 4))*block.squares[i].x;
         }
-        if (point.x >= 0 && point.x < COLS &&
-            point.y >= 0 && point.y < ROWS) {
+        if (shadow) {
+          point.y += block.rowsFree;
+          drawBoardSquare(bd, point.y, point.x, block.color, true);
+        } else {
           drawBoardSquare(bd, point.y, point.x, Color.mix(block.color,
               Color.WHITE, Color.LAMBDA*(1 - Color.LAMBDA)));
         }
@@ -419,9 +423,9 @@ package {
     }
 
     private function drawBoardSquare(
-        bd:BitmapData, i:int, j:int, c:int):void {
+        bd:BitmapData, i:int, j:int, c:int, shadow:Boolean=false):void {
       i = i - (ROWS - VISIBLEROWS);
-      if (i < 0 || c == 0x0) {
+      if (i < 0 || i >= VISIBLEROWS || j < 0 || j >= COLS || c == 0x0) {
         return;
       }
       drawRect(bd, xPos + SQUAREWIDTH*j, yPos + SQUAREWIDTH*i,
