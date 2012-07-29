@@ -208,28 +208,34 @@ package {
 // ntris game logic begins here!
 //-------------------------------------------------------------------------
     private function update():void {
-      curFrame = (curFrame + 1) % MAXFRAME;
       repeater.query(keysFired);
 
-      if (state == GAMEOVER) {
+      if (state == PLAYING) {
+        curFrame = (curFrame + 1) % MAXFRAME;
+
         if (keysFired.indexOf(Key.PAUSE) >= 0) {
+          state = PAUSED;
+          return;
+        } else if (!held && keysFired.indexOf(Key.HOLD) >= 0) {
+          curBlock = getNextBlock(curBlock);
+        } else if (curBlock == null || moveBlock(curBlock)) {
+          curBlock = getNextBlock();
+        }
+
+        if (previewFrame > 0) {
+          previewFrame--;
+          previewOffset = previewOffset*previewFrame/(previewFrame + 1);
+        }
+
+        if (curBlock != null && curBlock.rowsFree < 0) {
+          state = GAMEOVER;
+        }
+      } else if (keysFired.indexOf(Key.PAUSE) >= 0) {
+        if (state == PAUSED) {
+          state = PLAYING;
+        } else {
           resetBoard();
         }
-        return;
-      } else if (curBlock != null && curBlock.rowsFree < 0) {
-        state = GAMEOVER;
-        return;
-      }
-
-      if (!held && keysFired.indexOf(Key.HOLD) >= 0) {
-        curBlock = getNextBlock(curBlock);
-      } else if (curBlock == null || moveBlock(curBlock)) {
-        curBlock = getNextBlock();
-      }
-
-      if (previewFrame > 0) {
-        previewFrame--;
-        previewOffset = previewOffset*previewFrame/(previewFrame + 1);
       }
     }
 
@@ -521,7 +527,12 @@ package {
       scoreText.text = "" + score;
       drawTextField(canvasBD, scoreText);
       drawTextField(canvasBD, framerateText);
-      if (state == GAMEOVER) {
+      if (state == PAUSED) {
+        fillRect(canvasBD, BORDER, BORDER, WIDTH - 2*BORDER,
+                 HEIGHT - 2*BORDER, Color.BLACK);
+        stateText.text = "-- PAUSED --\nPress ENTER to resume";
+        drawTextField(canvasBD, stateText);
+      } else if (state == GAMEOVER) {
         canvasBD.colorTransform(new Rectangle(0, 0, WIDTH, HEIGHT), redTint);
         stateText.text = "-- You FAILED --\nPress ENTER to try again";
         drawTextField(canvasBD, stateText);
