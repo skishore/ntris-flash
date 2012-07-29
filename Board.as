@@ -74,6 +74,7 @@ package {
     private var redTint:ColorTransform;
     private var framerateText:TextField;
     private var scoreText:TextField;
+    private var stateText:TextField;
 
     // Timing variables.
     private var timer:Timer;
@@ -143,12 +144,25 @@ package {
       var scoreFormat:TextFormat = new TextFormat();
       scoreFormat.align = TextFormatAlign.RIGHT;
       scoreText.defaultTextFormat = scoreFormat;
+
+      stateText = new TextField();
+      stateText.width = 192;
+      stateText.height = 34;
+      stateText.x = (WIDTH - stateText.width)/2;
+      stateText.y = (HEIGHT - stateText.height)/2;
+      stateText.textColor = 0xffffff;
+      stateText.background = true;
+      stateText.backgroundColor = Color.BLACK;
+      var stateFormat:TextFormat = new TextFormat();
+      stateFormat.align = TextFormatAlign.CENTER;
+      stateFormat.size = 14;
+      stateText.defaultTextFormat = stateFormat;
     }
 
     private function resetBoard():void {
       for (var i:int = 0; i < ROWS; i++) {
         for (var j:int = 0; j < COLS; j++) {
-          data[i][j] = 0x0;
+          data[i][j] = Color.BLACK;
         }
       }
 
@@ -509,6 +523,8 @@ package {
       drawTextField(canvasBD, framerateText);
       if (state == GAMEOVER) {
         canvasBD.colorTransform(new Rectangle(0, 0, WIDTH, HEIGHT), redTint);
+        stateText.text = "-- You FAILED --\nPress ENTER to try again";
+        drawTextField(canvasBD, stateText);
       }
 
       canvasBD.unlock();
@@ -558,7 +574,7 @@ package {
     private function drawBoardSquare(
         bd:BitmapData, i:int, j:int, c:int, shadow:Boolean=false):void {
       i = i - (ROWS - VISIBLEROWS);
-      if (i < 0 || i >= VISIBLEROWS || j < 0 || j >= COLS || c == 0x0) {
+      if (i < 0 || i >= VISIBLEROWS || j < 0 || j >= COLS || c == Color.BLACK) {
         return;
       }
       if (shadow) {
