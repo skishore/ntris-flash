@@ -51,7 +51,7 @@ package {
             if (Key.doesKeyRepeat[key]) {
               keysFired.push(key);
             }
-            nextFireTime[key] += repeat;
+            nextFireTime[key] = curTime + repeat;
           }
         } else if (nextFireTime[key] > 0) {
           nextFireTime[key] = -1;
