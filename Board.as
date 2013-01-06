@@ -153,7 +153,7 @@ package {
 
       stateText = new TextField();
       stateText.width = 192;
-      stateText.height = 34;
+      stateText.height = 38;
       stateText.x = (WIDTH - stateText.width)/2;
       stateText.y = (HEIGHT - stateText.height)/2;
       stateText.textColor = 0xffffff;
