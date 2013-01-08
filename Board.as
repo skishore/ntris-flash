@@ -42,8 +42,8 @@ package {
     private static const FRAMERATE:int = 50;
     private static const FRAMEDELAY:int = 1000/FRAMERATE;
     private static const MAXFRAME:int = 3628800;
-    private static const PAUSE:int = 110;
-    private static const REPEAT:int = 30;
+    private static const PAUSE:int = 7;
+    private static const REPEAT:int = 1;
 
     // Block movement constants, some of which are imported by Block.
     private static const GRAVITY:int = FRAMERATE;
