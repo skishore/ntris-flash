@@ -110,6 +110,7 @@ package {
     private var lastPos:Point;
     private var lastAngle:int;
     private var lastRowsFree:int;
+    private var lastPreviewOffset:int;
     private var optimize:Boolean;
 
     public function Board() {
@@ -504,20 +505,41 @@ package {
 // Drawing code begins here!
 // None of these drawing functions should modify ANY state.
 //-------------------------------------------------------------------------
-    private function saveBlock():void {
+    private function saveState():void {
       lastPos.x = curBlock.x;
       lastPos.y = curBlock.y;
       lastAngle = curBlock.angle;
       lastRowsFree = curBlock.rowsFree;
+      lastPreviewOffset = previewOffset;
     }
 
     private function optimizeDraw():void {
-      eraseBlock(canvasBD, curBlock, lastPos, lastAngle);
-      lastPos.y += lastRowsFree;
-      eraseBlock(canvasBD, curBlock, lastPos, lastAngle);
-      drawBlock(canvasBD, curBlock, true);
-      drawBlock(canvasBD, curBlock);
-      saveBlock();
+      if (curBlock.x != lastPos.x || curBlock.y != lastPos.y || curBlock.angle != lastAngle) {
+        eraseBlock(canvasBD, curBlock, lastPos, lastAngle);
+        lastPos.y += lastRowsFree;
+        eraseBlock(canvasBD, curBlock, lastPos, lastAngle);
+        drawBlock(canvasBD, curBlock, true);
+        drawBlock(canvasBD, curBlock);
+      }
+
+      if (previewOffset != lastPreviewOffset) {
+        fillRect(canvasBD, xPos + SQUAREWIDTH*COLS, yPos, 7*SQUAREWIDTH/2,
+                 5*SQUAREWIDTH/2*(PREVIEW + 2) + 1, Color.BLACK);
+        var xOffset:int = xPos + SQUAREWIDTH*COLS + SIDEBOARD/2;
+        var yOffset:int = yPos + SQUAREWIDTH + previewOffset;
+        for (var i:int = 0; i < preview.length; i++) {
+          drawFreeBlock(canvasBD, Block.prototypes[preview[i]], xOffset, yOffset,
+                        SQUAREWIDTH/2, (i == 0 ? -Color.LAMBDA : 2*Color.LAMBDA));
+          yOffset += (Block.prototypes[preview[i]].height + 2)*SQUAREWIDTH/2;
+        }
+      }
+
+      xOffset = xPos + SQUAREWIDTH*COLS + SQUAREWIDTH/2;
+      yOffset = yPos + 5*SQUAREWIDTH/2*(PREVIEW + 4) + 15;
+      fillRect(canvasBD, xOffset, yOffset, 3*SQUAREWIDTH, 15, Color.BLACK);
+      drawTextField(canvasBD, framerateText);
+
+      saveState();
       canvasBD.unlock();
     }
 
@@ -528,7 +550,7 @@ package {
         if (optimize) {
           return optimizeDraw();
         }
-        saveBlock();
+        saveState();
         optimize = true;
       } else {
         optimize = false;
