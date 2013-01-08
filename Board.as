@@ -46,10 +46,10 @@ package {
     private static const REPEAT:int = 24;
 
     // Block movement constants, some of which are imported by Block.
-    private static const GRAVITY:int = 60;
+    private static const GRAVITY:int = FRAMERATE;
     public static const SHOVEAWAYS:int = 2;
-    public static const LOCALSTICKFRAMES:int = 24;
-    public static const GLOBALSTICKFRAMES:int = 120;
+    public static const LOCALSTICKFRAMES:int = 2*FRAMERATE/5;
+    public static const GLOBALSTICKFRAMES:int = 2*FRAMERATE;
 
     // Block overlap codes, in order of priority.
     private static const LEFTEDGE:int = 0;
