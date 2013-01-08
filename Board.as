@@ -18,7 +18,8 @@ package {
   import Key;
   import KeyRepeater;
 
-  [SWF(width="280", height="416")]
+  //[SWF(width="280", height="416")]
+  [SWF(width="367", height="546")]
 
   public class Board extends MovieClip {
     // Board size constants.
@@ -27,7 +28,8 @@ package {
     private static const COLS:int = 12;
 
     // Screen size constants.
-    private static const SQUAREWIDTH:int = 16;
+    //private static const SQUAREWIDTH:int = 16;
+    private static const SQUAREWIDTH:int = 21;
     private static const BORDER:int = SQUAREWIDTH;
     private static const SIDEBOARD:int = 7*SQUAREWIDTH/2;
     private static const WIDTH:int = SQUAREWIDTH*COLS + SIDEBOARD + 2*BORDER;
