@@ -496,6 +496,11 @@ package {
     private function draw():void {
       canvasBD.lock();
 
+      if (canOptimizeDraw()) {
+        optimizeDraw();
+        return;
+      }
+
       // Clear the screen and draw the border and grid lines.
       fillRect(canvasBD, 0, 0, WIDTH, HEIGHT, Color.BLACK);
       drawRect(canvasBD, BORDER/2 - 1, BORDER/2 - 1,
