@@ -28,6 +28,7 @@ package {
       var key:int = Key.translateKeyCode(keyEvent.keyCode);
       if (key >= 0) {
         isKeyDown[key] = true;
+        nextFireTime[key] = 0;
       }
     }
 
@@ -44,16 +45,19 @@ package {
       var curTime:int = getTimer();
       for (var key:int = 0; key < Key.NUMKEYS; key++) {
         if (isKeyDown[key]) {
-          if (nextFireTime[key] < 0) {
+          if (nextFireTime[key] <= 0) {
             keysFired.push(key);
             nextFireTime[key] = int((curTime + pause)/repeat + 1)*repeat;
           } else if (curTime > nextFireTime[key]) {
             if (Key.doesKeyRepeat[key]) {
               keysFired.push(key);
             }
-            nextFireTime[key] = curTime + repeat;
+            nextFireTime[key] = curTime + (key == Key.DOWN ? repeat/2 : repeat);
           }
         } else if (nextFireTime[key] > 0) {
+          nextFireTime[key] = -1;
+        } else if (nextFireTime[key] == 0) {
+          keysFired.push(key);
           nextFireTime[key] = -1;
         }
       }
