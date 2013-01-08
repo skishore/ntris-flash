@@ -106,6 +106,12 @@ package {
     private var repeater:KeyRepeater;
     private var keysFired:Vector.<int>;
 
+    // Draw optimization variables.
+    private var lastPos:Point;
+    private var lastAngle:int;
+    private var lastRowsFree:int;
+    private var optimize:Boolean;
+
     public function Board() {
       initGraphics();
       Block.loadBlockData();
@@ -127,6 +133,9 @@ package {
       timer = new Timer(FRAMEDELAY, 1);
       timer.addEventListener(TimerEvent.TIMER, gameLoop);
       timer.start();
+
+      lastPos = new Point();
+      optimize = false;
     }
 
     private function initGraphics():void {
@@ -262,6 +271,7 @@ package {
         } else {
           resetBoard();
         }
+        optimize = false;
       }
     }
 
@@ -289,6 +299,7 @@ package {
       block.rowsFree = calculateRowsFree(block);
 
       held = (swap != null);
+      optimize = false;
       return block;
     }
 
@@ -493,12 +504,34 @@ package {
 // Drawing code begins here!
 // None of these drawing functions should modify ANY state.
 //-------------------------------------------------------------------------
+    private function saveBlock():void {
+      lastPos.x = curBlock.x;
+      lastPos.y = curBlock.y;
+      lastAngle = curBlock.angle;
+      lastRowsFree = curBlock.rowsFree;
+    }
+
+    private function optimizeDraw():void {
+      eraseBlock(canvasBD, curBlock, lastPos, lastAngle);
+      lastPos.y += lastRowsFree;
+      eraseBlock(canvasBD, curBlock, lastPos, lastAngle);
+      drawBlock(canvasBD, curBlock, true);
+      drawBlock(canvasBD, curBlock);
+      saveBlock();
+      canvasBD.unlock();
+    }
+
     private function draw():void {
       canvasBD.lock();
 
-      if (canOptimizeDraw()) {
-        optimizeDraw();
-        return;
+      if (state == PLAYING && curBlock != null) {
+        if (optimize) {
+          return optimizeDraw();
+        }
+        saveBlock();
+        optimize = true;
+      } else {
+        optimize = false;
       }
 
       // Clear the screen and draw the border and grid lines.
@@ -598,6 +631,21 @@ package {
       }
     }
 
+    private function eraseBlock(
+        bd:BitmapData, block:Block, pos:Point, angle:int):void {
+      var point:Point = new Point();
+      for (var i:int = 0; i < block.numSquares; i++) {
+        if (angle % 2 == 0) {
+          point.x = pos.x + (1 - (angle % 4))*block.squares[i].x;
+          point.y = pos.y + (1 - (angle % 4))*block.squares[i].y;
+        } else {
+          point.x = pos.x - (2 - (angle % 4))*block.squares[i].y;
+          point.y = pos.y + (2 - (angle % 4))*block.squares[i].x;
+        }
+        drawBoardSquare(bd, point.y, point.x, Color.BLACK, false, true);
+      }
+    }
+
     private function drawFreeBlock(
         bd:BitmapData, block:Block, x:int, y:int, w:int, lambda:Number):void {
       var point:Point = new Point();
@@ -614,9 +662,9 @@ package {
     }
 
     private function drawBoardSquare(
-        bd:BitmapData, i:int, j:int, c:int, shadow:Boolean=false):void {
+        bd:BitmapData, i:int, j:int, c:int, shadow:Boolean=false, erase:Boolean=false):void {
       i = i - (ROWS - VISIBLEROWS);
-      if (i < 0 || i >= VISIBLEROWS || j < 0 || j >= COLS || c == Color.BLACK) {
+      if (i < 0 || i >= VISIBLEROWS || j < 0 || j >= COLS || (c == Color.BLACK && !erase)) {
         return;
       }
       if (shadow) {
