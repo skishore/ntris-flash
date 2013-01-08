@@ -52,7 +52,7 @@ package {
             if (Key.doesKeyRepeat[key]) {
               keysFired.push(key);
             }
-            nextFireTime[key] = curTime + (key == Key.DOWN ? repeat/2 : repeat);
+            nextFireTime[key] = curTime + (key == Key.DOWN ? 0 : repeat);
           }
         } else if (nextFireTime[key] > 0) {
           nextFireTime[key] = -1;

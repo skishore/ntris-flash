@@ -39,11 +39,11 @@ package {
     private static const GAMEOVER:int = 2;
 
     // Game engine constants.
-    private static const FRAMERATE:int = 60;
+    private static const FRAMERATE:int = 50;
     private static const FRAMEDELAY:int = 1000/FRAMERATE;
     private static const MAXFRAME:int = 3628800;
-    private static const PAUSE:int = 120;
-    private static const REPEAT:int = 24;
+    private static const PAUSE:int = 110;
+    private static const REPEAT:int = 30;
 
     // Block movement constants, some of which are imported by Block.
     private static const GRAVITY:int = FRAMERATE;
@@ -514,6 +514,8 @@ package {
     }
 
     private function optimizeDraw():void {
+      canvasBD.lock();
+
       if (curBlock.x != lastPos.x || curBlock.y != lastPos.y || curBlock.angle != lastAngle) {
         eraseBlock(canvasBD, curBlock, lastPos, lastAngle);
         lastPos.y += lastRowsFree;
@@ -544,8 +546,6 @@ package {
     }
 
     private function draw():void {
-      canvasBD.lock();
-
       if (state == PLAYING && curBlock != null) {
         if (optimize) {
           return optimizeDraw();
@@ -555,6 +555,8 @@ package {
       } else {
         optimize = false;
       }
+
+      canvasBD.lock();
 
       // Clear the screen and draw the border and grid lines.
       fillRect(canvasBD, 0, 0, WIDTH, HEIGHT, Color.BLACK);
