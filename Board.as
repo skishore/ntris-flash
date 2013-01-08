@@ -18,7 +18,7 @@ package {
   import Key;
   import KeyRepeater;
 
-  [SWF(width="367", height="546")]
+  [SWF(width="280", height="416")]
 
   public class Board extends MovieClip {
     // Board size constants.
@@ -27,7 +27,7 @@ package {
     private static const COLS:int = 12;
 
     // Screen size constants.
-    private static const SQUAREWIDTH:int = 21;
+    private static const SQUAREWIDTH:int = 16;
     private static const BORDER:int = SQUAREWIDTH;
     private static const SIDEBOARD:int = 7*SQUAREWIDTH/2;
     private static const WIDTH:int = SQUAREWIDTH*COLS + SIDEBOARD + 2*BORDER;
@@ -536,10 +536,10 @@ package {
         }
       }
 
-      xOffset = xPos + SQUAREWIDTH*COLS + SQUAREWIDTH/2;
-      yOffset = yPos + 5*SQUAREWIDTH/2*(PREVIEW + 4) + 15;
-      fillRect(canvasBD, xOffset, yOffset, 3*SQUAREWIDTH, 15, Color.BLACK);
-      drawTextField(canvasBD, framerateText);
+      //xOffset = xPos + SQUAREWIDTH*COLS + SQUAREWIDTH/2;
+      //yOffset = yPos + 5*SQUAREWIDTH/2*(PREVIEW + 4) + 15;
+      //fillRect(canvasBD, xOffset, yOffset, 3*SQUAREWIDTH, 15, Color.BLACK);
+      //drawTextField(canvasBD, framerateText);
 
       saveState();
       canvasBD.unlock();
@@ -614,7 +614,7 @@ package {
       // Draw the score and framerate. If the game is paused or over, draw text.
       scoreText.text = "" + score;
       drawTextField(canvasBD, scoreText);
-      drawTextField(canvasBD, framerateText);
+      //drawTextField(canvasBD, framerateText);
       if (state == PAUSED) {
         fillRect(canvasBD, BORDER, BORDER, WIDTH - 2*BORDER,
                  HEIGHT - 2*BORDER, Color.BLACK);
