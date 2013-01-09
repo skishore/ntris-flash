@@ -1,0 +1,76 @@
+body {
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 12px;
+  width: 1250px;
+}
+
+#topbar {
+  background-color: #CCF;
+  border: 1px solid #668;
+  padding: 2px;
+  width: 1240px;
+}
+
+.container {
+  float: left;
+  margin: 8px;
+  width: 250px;
+}
+
+.large.container {
+  float: left;
+  margin: 8px;
+  width: 516px;
+}
+
+.header {
+  background-color: #CCC;
+  border: 1px solid #555;
+  padding: 5px 3px;
+}
+
+.ui-menu {
+  height: 198px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-width: 0px 1px 1px;
+  overflow-y: auto;
+}
+
+#leftside {
+  margin-right: 6px;
+  float: left;
+  width: 700px;
+  height: 600px;
+}
+
+#buttonbar {
+  background: #BBB;
+  border: 1px solid #555;
+  margin: 8px 0px 8px 8px;
+  padding: 1px;
+}
+
+#rightside {
+  float: left;
+  width: 540px;
+  height: 600px;
+}
+
+#mainboard {
+  background: black;
+  height: 546px;
+  width: 357px;
+}
+
+.leftalign {
+  text-align: left;
+}
+
+.outline {
+  border: 1px dotted #888;
+}
+
+.color {
+  background-color: grey;
+}
