@@ -11,7 +11,6 @@ var ntris = {
     $('#chat').width($('#chatbox').width() - $('#chatheader').width() - 5);
   },
 
-  // Blocks on loading Board.swf.
   create_board: function(id, squareWidth) {
     var width = 14*squareWidth + Math.floor(7*squareWidth/2);
     var height = 26*squareWidth;
