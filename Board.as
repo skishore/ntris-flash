@@ -23,6 +23,8 @@ package {
   import KeyRepeater;
 
   public class Board extends MovieClip {
+    private static const debug:Boolean = true;
+
     // Board size constants.
     private static const VISIBLEROWS:int = 24;
     private static const ROWS:int = (VISIBLEROWS + Block.MAXBLOCKSIZE - 1);
@@ -80,7 +82,6 @@ package {
     private var yPos:int;
     private var canvasBD:BitmapData;
     private var redTint:ColorTransform;
-    private var framerateText:TextField;
     private var scoreText:TextField;
     private var stateText:TextField;
 
@@ -138,17 +139,32 @@ package {
       lastPos = new Point();
       optimize = false;
 
-      ExternalInterface.addCallback('setSquareWidth', setSquareWidth);
+      setSquareWidth(flashVars().squareWidth);
       ExternalInterface.addCallback('start', startTimer);
-      ExternalInterface.call('ntris.board_callback',
-          flashVars().html_id, flashVars().squareWidth);
+      ExternalInterface.addCallback('pause', pauseTimer);
+      ExternalInterface.call('ntris.board_callback', flashVars().html_id);
     }
 
     private function flashVars():Object {
       return Object(LoaderInfo(this.loaderInfo).parameters);
     }
 
-    public function setSquareWidth(squareWidth:int):void {
+    public function startTimer():void {
+      if (timer == null) {
+        timer = new Timer(FRAMEDELAY, 1);
+        timer.addEventListener(TimerEvent.TIMER, gameLoop);
+      } else {
+        afterTime = getTimer();
+        timer.delay = FRAMEDELAY;
+      }
+      timer.start();
+    }
+
+    private function pauseTimer():void {
+      timer.reset();
+    }
+
+    private function setSquareWidth(squareWidth:int):void {
       SQUAREWIDTH = squareWidth;
       BORDER = SQUAREWIDTH;
       SIDEBOARD = 7*SQUAREWIDTH/2;
@@ -160,20 +176,6 @@ package {
       initGraphics();
     }
 
-    public function startTimer():void {
-      if (timer == null) {
-        timer = new Timer(FRAMEDELAY, 1);
-        timer.addEventListener(TimerEvent.TIMER, gameLoop);
-      } else {
-        timer.delay = FRAMEDELAY;
-      }
-      timer.start();
-    }
-
-    private function pauseTimer():void {
-      timer.reset();
-    }
-
     private function initGraphics():void {
       canvasBD = new BitmapData(WIDTH, HEIGHT, false, 0xffffff);
       addChild(new Bitmap(canvasBD));
@@ -181,11 +183,6 @@ package {
       redTint = new ColorTransform();
       redTint.redMultiplier = 0.5;
       redTint.redOffset = 128;
-
-      framerateText = new TextField();
-      framerateText.x = BORDER + SQUAREWIDTH*COLS + SQUAREWIDTH/2;
-      framerateText.y = HEIGHT - BORDER - SQUAREWIDTH;
-      framerateText.textColor = 0xffffff;
 
       scoreText = new TextField();
       scoreText.x = BORDER + SQUAREWIDTH*COLS + 3*SQUAREWIDTH/4;
@@ -234,12 +231,21 @@ package {
       numFrames++;
       if (beforeTime > lastSecond + 1000) {
         var framesPerSecond:Number = 1000.0*numFrames/(beforeTime - lastSecond);
-        framerateText.text = "FPS: " + framesPerSecond.toPrecision(4);
+        if (debug) {
+          ExternalInterface.call('ntris.log_framerate',
+              flashVars().html_id, framesPerSecond.toPrecision(4));
+        }
         numFrames = 0;
         lastSecond = beforeTime;
       }
 
       update();
+      var extraFrames:int = oversleepTime/FRAMEDELAY;
+      if (extraFrames > 1) {
+        for (var i:int = 0; i < extraFrames; i++) {
+          update();
+        }
+      }
       draw();
 
       afterTime = getTimer();
@@ -571,11 +577,6 @@ package {
         }
       }
 
-      //xOffset = xPos + SQUAREWIDTH*COLS + SQUAREWIDTH/2;
-      //yOffset = yPos + 5*SQUAREWIDTH/2*(PREVIEW + 4) + 15;
-      //fillRect(canvasBD, xOffset, yOffset, 3*SQUAREWIDTH, 15, Color.BLACK);
-      //drawTextField(canvasBD, framerateText);
-
       saveState();
       canvasBD.unlock();
     }
@@ -649,7 +650,6 @@ package {
       // Draw the score and framerate. If the game is paused or over, draw text.
       scoreText.text = "" + score;
       drawTextField(canvasBD, scoreText);
-      //drawTextField(canvasBD, framerateText);
       if (state == PAUSED) {
         fillRect(canvasBD, BORDER, BORDER, WIDTH - 2*BORDER,
                  HEIGHT - 2*BORDER, Color.BLACK);

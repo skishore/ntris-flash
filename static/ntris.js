@@ -18,11 +18,17 @@ var ntris = {
     });
   },
 
-  board_callback: function(id, squareWidth) {
+  board_callback: function(id) {
     var board = $('#' + id)[0];
-    board.setSquareWidth(parseInt(squareWidth, 10));
     board.start();
+  },
+
+  log_framerate: function(id, framerate) {
+    //console.log('FPS (' + id + '): ' + framerate);
   },
 };
 
 ntris.create_board('mainboard', 10);
+setTimeout(function() {
+  board = $('#mainboard')[0];
+}, 1000);
