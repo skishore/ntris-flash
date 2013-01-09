@@ -1,14 +1,29 @@
 var ntris = {
-  initialize: function() { 
+  initialize: function() {
+    this._room_prototype = $('#room-prototype').html() + '</div>';
+    this.create_room('lobby', 'Lobby', true);
+
     $('#tabs').tabs();
     $('button').button().click(function(event) {
       event.preventDefault();
     });
+  },
 
-    $('#users').menu();
-    $('#rooms').menu();
+  create_room: function(id, name, skip_refresh) {
+    roomHTML = '<div class="room-tab" id="' + id + '">' + this._room_prototype;
+    $('#tablist').append('<li><a href="#' + id + '">' + name + '</a></li>');
+    $('#tabs').append(roomHTML);
+
+    var room = $('#' + id);
+    room.find('#users').menu();
+    room.find('#rooms').menu();
     // TODO: Figure out why we need to subtract 5.
-    $('#chat').width($('#chatbox').width() - $('#chatheader').width() - 5);
+    var width = room.find('#chatbox').width() - room.find('#chatheader').width();
+    room.find('#chat').width(width - 5);
+
+    if (!skip_refresh) {
+      $('#tabs').tabs('refresh');
+    }
   },
 
   create_board: function(id, squareWidth) {
@@ -29,8 +44,3 @@ var ntris = {
     //console.log('FPS (' + id + '): ' + framerate);
   },
 };
-
-//ntris.create_board('mainboard', 10);
-//setTimeout(function() {
-//  board = $('#mainboard')[0];
-//}, 1000);

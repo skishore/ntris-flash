@@ -80,14 +80,6 @@ body {
   text-align: left;
 }
 
-.outline {
-  border: 1px dotted #888;
-}
-
-.color {
-  background-color: grey;
-}
-
 #leftside {
   float: left;
   padding-top: 8px;
@@ -126,4 +118,8 @@ body {
 .board {
   background: black;
   height: 208px;
+}
+
+#room-prototype {
+  display: none;
 }
