@@ -15,11 +15,8 @@ var ntris = {
     $('#tabs').append(roomHTML);
 
     var room = $('#' + id);
-    room.find('#users').menu();
-    room.find('#rooms').menu();
-    // TODO: Figure out why we need to subtract 5.
-    var width = room.find('#chatbox').width() - room.find('#chatheader').width();
-    room.find('#chat').width(width - 5);
+    room.find('.users').menu();
+    room.find('.rooms').menu();
 
     if (!skip_refresh) {
       $('#tabs').tabs('refresh');

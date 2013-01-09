@@ -46,22 +46,24 @@ body {
   border-width: 1px;
   float: left;
   padding: 2px;
+  width: 63;
 }
 
-#chatbox, #chat {
+.chatbox, .chat {
   margin: 0px;
   outline: none;
   padding: 2px;
   resize: none;
 }
 
-#chat {
+.chat {
   border: solid #666;
   border-width: 1px 1px 1px 0px;
   padding: 2px;
+  width: 265px;
 }
 
-#chatbox {
+.chatbox {
   border: solid #AAA;
   border-width: 0px 1px;
   height: 220px;
@@ -80,7 +82,7 @@ body {
   text-align: left;
 }
 
-#leftside {
+.left-side {
   float: left;
   padding-top: 8px;
   padding-left: 11px;
@@ -89,7 +91,7 @@ body {
   height: 500px;
 }
 
-#rightside {
+.right-side {
   float: left;
   width: 350px;
   height: 500px;
