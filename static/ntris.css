@@ -39,7 +39,7 @@ body {
 .header {
   background-color: #CCC;
   border: 1px solid #555;
-  padding: 2px;
+  padding: 2px 4px;
 }
 
 .short.header {
