@@ -1,13 +1,14 @@
 <head>
   <link rel="stylesheet" type="text/css" href="static/jquery-ui.css">
-  <!-- Our CSS. -->
-  <link rel="stylesheet" type="text/css" href="static/style.css">
+  <link rel="stylesheet" type="text/css" href="static/ntris.css">
 
   <script type="text/javascript" src="static/jquery-1.8.3.js"></script>
   <script type="text/javascript" src="static/jquery-ui.js"></script>
+  <script type="text/javascript" src="static/swfobject.js"></script>
+  <script type="text/javascript" src="static/ntris.js"></script>
 </head>
 
-<body bgcolor=white>
+<body bgcolor=white onload="ntris.initialize()">
   <center>
     <div class="leftalign">
       <div id="topbar">
@@ -54,16 +55,6 @@
           <input type="text" id="chat">
         </div>
       </div>
-      <!--
-      -->
     </div>
   </center>
 </body>
-
-<script>
-  $('button').button().click(function(event) {
-    event.preventDefault();
-  });
-  $('ul').menu();
-  $('#chat').width($('#chatbox').width() - $('#chatheader').width());
-</script>

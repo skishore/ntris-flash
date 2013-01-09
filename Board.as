@@ -2,10 +2,14 @@ package {
   import flash.display.MovieClip;
   import flash.events.KeyboardEvent;
   import flash.events.TimerEvent;
+  import flash.external.ExternalInterface;
   import flash.utils.Timer;
   import flash.utils.getTimer;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
+	import flash.display.LoaderInfo;
+	import flash.display.StageAlign;
+	import flash.display.StageScaleMode;
   import flash.geom.ColorTransform;
   import flash.geom.Matrix;
   import flash.geom.Rectangle;
@@ -18,22 +22,18 @@ package {
   import Key;
   import KeyRepeater;
 
-  //[SWF(width="280", height="416")]
-  [SWF(width="367", height="546")]
-
   public class Board extends MovieClip {
     // Board size constants.
     private static const VISIBLEROWS:int = 24;
     private static const ROWS:int = (VISIBLEROWS + Block.MAXBLOCKSIZE - 1);
     private static const COLS:int = 12;
 
-    // Screen size constants.
-    //private static const SQUAREWIDTH:int = 16;
-    private static const SQUAREWIDTH:int = 21;
-    private static const BORDER:int = SQUAREWIDTH;
-    private static const SIDEBOARD:int = 7*SQUAREWIDTH/2;
-    private static const WIDTH:int = SQUAREWIDTH*COLS + SIDEBOARD + 2*BORDER;
-    private static const HEIGHT:int = SQUAREWIDTH*VISIBLEROWS + 2*BORDER;
+    // Screen size variables, set by a call to setSquareWidth.
+    private static var SQUAREWIDTH:int;
+    private static var BORDER:int;
+    private static var SIDEBOARD:int;
+    private static var WIDTH:int;
+    private static var HEIGHT:int;
 
     // Game states.
     private static const PLAYING:int = 0;
@@ -76,8 +76,8 @@ package {
         Vector.<int>([0, 1, 3, 7, 15, 31, 63, 79, 87, 91, 93]);
 
     // Canvas bitmap data.
-    private var xPos:int = BORDER;
-    private var yPos:int = BORDER;
+    private var xPos:int;
+    private var yPos:int;
     private var canvasBD:BitmapData;
     private var redTint:ColorTransform;
     private var framerateText:TextField;
@@ -116,7 +116,9 @@ package {
     private var optimize:Boolean;
 
     public function Board() {
-      initGraphics();
+      stage.align = StageAlign.TOP_LEFT;
+      stage.scaleMode = StageScaleMode.NO_SCALE;
+
       Block.loadBlockData();
 
       data = new Vector.<Vector.<int>>();
@@ -133,12 +135,43 @@ package {
 
       resetBoard();
 
-      timer = new Timer(FRAMEDELAY, 1);
-      timer.addEventListener(TimerEvent.TIMER, gameLoop);
-      timer.start();
-
       lastPos = new Point();
       optimize = false;
+
+      ExternalInterface.addCallback('setSquareWidth', setSquareWidth);
+      ExternalInterface.addCallback('start', startTimer);
+      ExternalInterface.call('ntris.board_callback',
+          flashVars().html_id, flashVars().squareWidth);
+    }
+
+    private function flashVars():Object {
+      return Object(LoaderInfo(this.loaderInfo).parameters);
+    }
+
+    public function setSquareWidth(squareWidth:int):void {
+      SQUAREWIDTH = squareWidth;
+      BORDER = SQUAREWIDTH;
+      SIDEBOARD = 7*SQUAREWIDTH/2;
+      WIDTH = SQUAREWIDTH*COLS + SIDEBOARD + 2*BORDER;
+      HEIGHT = SQUAREWIDTH*VISIBLEROWS + 2*BORDER;
+
+      xPos = BORDER;
+      yPos = BORDER;
+      initGraphics();
+    }
+
+    public function startTimer():void {
+      if (timer == null) {
+        timer = new Timer(FRAMEDELAY, 1);
+        timer.addEventListener(TimerEvent.TIMER, gameLoop);
+      } else {
+        timer.delay = FRAMEDELAY;
+      }
+      timer.start();
+    }
+
+    private function pauseTimer():void {
+      timer.reset();
     }
 
     private function initGraphics():void {
@@ -164,7 +197,7 @@ package {
       scoreText.defaultTextFormat = scoreFormat;
 
       stateText = new TextField();
-      stateText.width = 192;
+      stateText.width = Math.min(192, SQUAREWIDTH*COLS + SIDEBOARD);
       stateText.height = 38;
       stateText.x = (WIDTH - stateText.width)/2;
       stateText.y = (HEIGHT - stateText.height)/2;
