@@ -445,7 +445,7 @@ package {
         }
         if (i == 0) {
           block.y++;
-        } else if (i == -1) {
+        } else if (i == 1) {
           block.y -= 2;
         } else {
           block.y--;
