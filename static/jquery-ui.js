@@ -10891,7 +10891,8 @@ var mouseHandled = false;
 $.widget( "ui.menu", {
   version: "1.9.2",
   defaultElement: "<ul>",
-  delay: 300,
+  // skishore -- change delay from 300 to 0.
+  delay: 0,
   options: {
     icons: {
       submenu: "ui-icon-carat-1-e"
@@ -10972,6 +10973,8 @@ $.widget( "ui.menu", {
       },
       mouseleave: "collapseAll",
       "mouseleave .ui-menu": "collapseAll",
+      // skishore -- add handler for moving the mouse on the menu but off the items.
+      "mouseleave .ui-menu-item": "collapseAll",
       focus: function( event, keepActiveItem ) {
         // If there's already an active item, keep it active
         // If not, activate the first item
