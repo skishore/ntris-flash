@@ -23,6 +23,21 @@ var ntris = {
     }
   },
 
+  launch_game: function(room, user, local) {
+    var target = (local ? '.local-board' : '.other-boards');
+    var cls = (local ? 'large-board' : 'board');
+    var id = room + '-' + user + '-board';
+
+    var room = $('#' + room);
+    var html = '<div class="' + cls + ' container">';
+    html += '<div class="header">' + user + '</div>';
+    html += '<div id="' + id + '" class="' + cls + '"></div></div>';
+    room.find(target).append(html);
+
+    var size = (local ? 16 : 8);
+    ntris.create_board(id, size);
+  },
+
   create_board: function(id, squareWidth) {
     var width = 14*squareWidth + Math.floor(7*squareWidth/2);
     var height = 26*squareWidth;

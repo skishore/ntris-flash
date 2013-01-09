@@ -101,13 +101,13 @@ body {
   margin-bottom: 8px;
 }
 
-.mainboard.container {
+.large-board.container {
   margin-top: 24px;
   width: 280px;
   height: auto,
 }
 
-.mainboard {
+.large-board {
   background: black;
   height: 416px;
 }
