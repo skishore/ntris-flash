@@ -75,26 +75,13 @@
 
         <div class="large container">
           <div class="header">
-            Games being played:
+            Chat:
           </div>
-          <ul id="users">
-            <li><a href="#">skishore</a></li>
-            <li><a href="#">pchrist</a></li>
-            <li><a href="#">bhamrick</a></li>
-            <li><a href="#">wuthefwasthat</a></li>
-            <li><a href="#">skishore</a></li>
-            <li><a href="#">pchrist</a></li>
-            <li><a href="#">bhamrick</a></li>
-            <li><a href="#">wuthefwasthat</a></li>
-            <li><a href="#">skishore</a></li>
-            <li><a href="#">pchrist</a></li>
-            <li><a href="#">bhamrick</a></li>
-            <li><a href="#">wuthefwasthat</a></li>
-            <li><a href="#">skishore</a></li>
-            <li><a href="#">pchrist</a></li>
-            <li><a href="#">bhamrick</a></li>
-            <li><a href="#">wuthefwasthat</a></li>
-          </ul>
+          <textarea readonly id="chatbox"></textarea>
+          <div id="chatheader" class="short header">
+            Send a message:
+          </div>
+          <input type="text" id="chat">
         </div>
       </div>
       <!--
@@ -108,4 +95,5 @@
     event.preventDefault();
   });
   $('ul').menu();
+  $('#chat').width($('#chatbox').width() - $('#chatheader').width());
 </script>

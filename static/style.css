@@ -29,6 +29,32 @@ body {
   padding: 5px 3px;
 }
 
+.short.header {
+  border-width: 1px;
+  float: left;
+  padding: 2px;
+}
+
+#chatbox, #chat {
+  margin: 0px;
+  outline: none;
+  padding: 2px;
+  resize: none;
+}
+
+#chat {
+  border: solid #666;
+  border-width: 1px 1px 1px 0px;
+  padding: 3px 2px;
+}
+
+#chatbox {
+  border: solid #AAA;
+  border-width: 0px 1px;
+  height: 296px;
+  width: 100%;
+}
+
 .ui-menu {
   height: 198px;
   border-top-left-radius: 0px;
