@@ -1,9 +1,12 @@
 var ntris = {
-  initialize: function() {
+  initialize: function() { 
+    $('#tabs').tabs();
     $('button').button().click(function(event) {
       event.preventDefault();
     });
-    $('ul').menu();
+
+    $('#users').menu();
+    $('#rooms').menu();
     // TODO: Figure out why we need to subtract 5.
     $('#chat').width($('#chatbox').width() - $('#chatheader').width() - 5);
   },
@@ -28,7 +31,7 @@ var ntris = {
   },
 };
 
-ntris.create_board('mainboard', 10);
-setTimeout(function() {
-  board = $('#mainboard')[0];
-}, 1000);
+//ntris.create_board('mainboard', 10);
+//setTimeout(function() {
+//  board = $('#mainboard')[0];
+//}, 1000);

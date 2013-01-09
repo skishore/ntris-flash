@@ -10,51 +10,63 @@
 
 <body bgcolor=white onload="ntris.initialize()">
   <center>
-    <div class="leftalign">
-      <div id="topbar">
-        Status: connecting to server...
-      </div>
-      <div id="leftside">
-        <div id="buttonbar">
-          <button id="singleplayer">Play singleplayer</button>
-          <button id="creategame">Create game</button>
-          <button id="highscores">View high scores</button>
-          <button id="settings">Change settings</button>
-        </div>
-        <center>
-          <div id="mainboard">
-          </div>
-        </center>
-      </div>
-      <div id="rightside">
-        <div class="container">
-          <div class="header">
-            Users currently online:
-          </div>
-          <ul id="users">
-            <li><a href="#">test</a></li>
-          </ul>
-        </div>
-        <div class="container">
-          <div class="header">
-            Games being played:
-          </div>
-          <ul id="games">
-            <li><a href="#">test</a></li>
-          </ul>
-        </div>
+    <div id="topbar" class="leftalign">
+      Status: connecting to server...
+    </div>
+    <div id="tabs" class="leftalign">
+      <ul id="tablist">
+        <button id="settings">Change settings</button>
+        <button id="highscores">View high scores</button>
+        <button id="creategame">Create game</button>
+        <button id="singleplayer">Play singleplayer</button>
 
-        <div class="large container">
-          <div class="header">
-            Chat:
+        <li><a href="#lobby">Lobby</a></li>
+      </ul>
+
+      <div id="lobby" class="room-tab">
+        <div id="leftside">
+          <div class="game header">
+            Games:
           </div>
-          <textarea readonly id="chatbox"></textarea>
-          <div id="chatheader" class="short header">
-            Send a message:
+          <div class="mainboard container"><div class="header">skishore</div><div class="mainboard" id="board"></div></div>
+          <div class="board container"><div class="header">skishore</div><div class="board"></div></div>
+          <div class="board container"><div class="header">skishore</div><div class="board"></div></div>
+          <div class="board container"><div class="header">skishore</div><div class="board"></div></div>
+          <div class="board container"><div class="header">skishore</div><div class="board"></div></div>
+          <div class="board container"><div class="header">skishore</div><div class="board"></div></div>
+          <div class="board container"><div class="header">skishore</div><div class="board"></div></div>
+        </div>
+        <div id="rightside">
+          <div class="container">
+            <div class="header">
+              Users:
+            </div>
+            <ul id="users">
+              <li><a href="#">test</a></li>
+            </ul>
           </div>
-          <input type="text" id="chat">
+          <div class="container">
+            <div class="header">
+              Rooms:
+            </div>
+            <ul id="rooms">
+              <li><a href="#">test</a></li>
+            </ul>
+          </div>
+
+          <div class="large container">
+            <div class="header">
+              Chat:
+            </div>
+            <textarea readonly id="chatbox"></textarea>
+            <div id="chatheader" class="short header">
+              Message:
+            </div>
+            <input type="text" id="chat">
+          </div>
         </div>
       </div>
+
     </div>
   </center>
 </body>

@@ -1,7 +1,7 @@
 body {
   font-family: Verdana, Arial, sans-serif;
   font-size: 12px;
-  width: 1250px;
+  width: 98%;
 }
 
 #topbar {
@@ -11,22 +11,35 @@ body {
   width: 1240px;
 }
 
+#tabs {
+  margin-top: 16px;
+  width: 1160px;
+}
+
+#tablist button {
+  float: right;
+}
+
+.room-tab {
+  height: 541px;
+}
+
 .container {
   float: left;
   margin: 8px;
-  width: 250px;
+  width: 159px;
 }
 
 .large.container {
   float: left;
   margin: 8px;
-  width: 516px;
+  width: 334px;
 }
 
 .header {
   background-color: #CCC;
   border: 1px solid #555;
-  padding: 5px 3px;
+  padding: 2px;
 }
 
 .short.header {
@@ -45,46 +58,22 @@ body {
 #chat {
   border: solid #666;
   border-width: 1px 1px 1px 0px;
-  padding: 3px 2px;
+  padding: 2px;
 }
 
 #chatbox {
   border: solid #AAA;
   border-width: 0px 1px;
-  height: 296px;
+  height: 220px;
   width: 100%;
 }
 
 .ui-menu {
-  height: 198px;
+  height: 220px;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
   border-width: 0px 1px 1px;
   overflow-y: auto;
-}
-
-#leftside {
-  margin-right: 6px;
-  float: left;
-  width: 700px;
-  height: 600px;
-}
-
-#buttonbar {
-  background: #BBB;
-  border: 1px solid #555;
-  margin: 8px 0px 8px 8px;
-  padding: 1px;
-}
-
-#rightside {
-  float: left;
-  width: 540px;
-  height: 600px;
-}
-
-#mainboard {
-  background: black;
 }
 
 .leftalign {
@@ -97,4 +86,44 @@ body {
 
 .color {
   background-color: grey;
+}
+
+#leftside {
+  float: left;
+  padding-top: 8px;
+  padding-left: 11px;
+  padding-right: 8px;
+  width: 770px;
+  height: 500px;
+}
+
+#rightside {
+  float: left;
+  width: 350px;
+  height: 500px;
+}
+
+.game.header {
+  margin-bottom: 8px;
+}
+
+.mainboard.container {
+  margin-top: 24px;
+  width: 280px;
+  height: auto,
+}
+
+.mainboard {
+  background: black;
+  height: 416px;
+}
+
+.board.container {
+  width: 140px;
+  height: auto;
+}
+
+.board {
+  background: black;
+  height: 208px;
 }
