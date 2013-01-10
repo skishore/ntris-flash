@@ -26,7 +26,7 @@ var ntris = {
   launch_game: function(room, user, local) {
     var target = (local ? '.local-board' : '.other-boards');
     var cls = (local ? 'large-board' : 'board');
-    var id = room + '-' + user + '-board';
+    var id = room + '-' + user + '-' + cls;
 
     var room = $('#' + room);
     var html = '<div class="' + cls + ' container">';
