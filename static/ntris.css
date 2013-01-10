@@ -4,6 +4,14 @@ body {
   width: 98%;
 }
 
+#socket_bridge {
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  width: 1px;
+  height: 1px;
+}
+
 #topbar {
   background-color: #CCF;
   border: 1px solid #668;

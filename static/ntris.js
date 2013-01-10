@@ -56,3 +56,26 @@ var ntris = {
     //console.log('FPS (' + id + '): ' + framerate);
   },
 };
+
+var socket;
+function socket_bridge_onload() {
+  socket = new FlashSocket({
+    on_connect: function() {
+      console.log('Connected!');
+      this.sendLine('<connection-made>')
+    },
+    on_data: function(data) {
+      console.log(data);
+    },
+    on_close: function() {
+      console.log('Lost connection.');
+    },
+    on_io_error: function(err) {
+      console.log('IO error: ', err);
+    },
+    on_security_error: function(err) {
+      console.log('Security error: ', err);
+    },
+  });
+  socket.connect('127.0.0.1', '2045');
+}
