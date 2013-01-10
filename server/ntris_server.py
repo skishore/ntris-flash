@@ -27,7 +27,7 @@ class ntrisSession(LineReceiver):
     pass
 
   def connectionLost(self, reason):
-    if self.sid:
+    if self.sid is not None:
       print 'Lost session %s' % (self.sid,)
       if self.sid in self.server.sessions:
         del self.server.sessions[self.sid]

@@ -15,10 +15,14 @@
 <script type="text/javascript">
 var socket;
 function test() {
+  FlashSocket.prototype.sendLine = function(message) {
+    this.write(message + '\0');
+  }
+
   socket = new FlashSocket({
     on_connect: function() {
       console.log('Connected!');
-      s.sendLine('<connection-made>')
+      this.sendLine('<connection-made>')
     },
     on_data: function(data) {
       console.log(data);
@@ -33,9 +37,7 @@ function test() {
       console.log('Security error: ', err);
     },
   });
-  socket.sendLine = function(message) {
-    s.write(message + '\0');
-  };
+
   socket.connect('127.0.0.1', '2045');
 }
 function onload() {
