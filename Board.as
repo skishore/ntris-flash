@@ -245,8 +245,9 @@ package {
         for (var i:int = 0; i < extraFrames; i++) {
           update();
         }
+      } else {
+        draw();
       }
-      draw();
 
       afterTime = getTimer();
       sleepTime = FRAMEDELAY - (afterTime - beforeTime) - oversleepTime;
@@ -292,6 +293,7 @@ package {
 
         if (keysFired.indexOf(Key.PAUSE) >= 0) {
           state = PAUSED;
+          optimize = false;
           return;
         } else if (!held && keysFired.indexOf(Key.HOLD) >= 0) {
           curBlock = getNextBlock(curBlock);
@@ -306,6 +308,7 @@ package {
 
         if (curBlock != null && curBlock.rowsFree < 0) {
           state = GAMEOVER;
+          optimize = false;
         }
       } else if (keysFired.indexOf(Key.PAUSE) >= 0) {
         if (state == PAUSED) {
@@ -582,14 +585,17 @@ package {
     }
 
     private function draw():void {
-      if (state == PLAYING && curBlock != null) {
-        if (optimize) {
+      if (state == PLAYING) {
+        if (curBlock == null) {
+          optimize = false;
+        } else if (optimize) {
           return optimizeDraw();
+        } else {
+          saveState();
+          optimize = true;
         }
-        saveState();
-        optimize = true;
-      } else {
-        optimize = false;
+      } else if (optimize) {
+        return;
       }
 
       canvasBD.lock();
