@@ -10,15 +10,13 @@
 }
 </style>
 <head>
-<body onload="onload();">
-<object id="socket_bridge" data="socket_bridge.swf" type="application/x-shockwave-flash"></object>
+<body>
+<object id="socket_bridge" data="socket_bridge/socket_bridge.swf"
+  type="application/x-shockwave-flash">
+</object>
 <script type="text/javascript">
 var socket;
 function test() {
-  FlashSocket.prototype.sendLine = function(message) {
-    this.write(message + '\0');
-  }
-
   socket = new FlashSocket({
     on_connect: function() {
       console.log('Connected!');
@@ -40,8 +38,8 @@ function test() {
 
   socket.connect('127.0.0.1', '2045');
 }
-function onload() {
-  setTimeout(test, 1000);
+function socket_bridge_onload() {
+  test();
 }
 </script>
 </body>
