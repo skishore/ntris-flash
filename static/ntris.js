@@ -23,9 +23,9 @@ var ntris = {
     }
   },
 
-  launch_game: function(room, user, local) {
-    var target = (local ? '.local-board' : '.other-boards');
-    var cls = (local ? 'large-board' : 'board');
+  launch_game: function(room, user, large) {
+    var target = (large ? '.large-boards' : '.boards');
+    var cls = target.slice(1, target.length - 1);
     var id = room + '-' + user + '-' + cls;
 
     var room = $('#' + room);
@@ -34,7 +34,7 @@ var ntris = {
     html += '<div id="' + id + '" class="' + cls + '"></div></div>';
     room.find(target).append(html);
 
-    var size = (local ? 16 : 8);
+    var size = (large ? 16 : 8);
     ntris.create_board(id, size);
   },
 
