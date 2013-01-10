@@ -7,6 +7,10 @@ var ntris = {
     $('button').button().click(function(event) {
       event.preventDefault();
     });
+
+    if (window.hasOwnProperty('after_initialize')) {
+      window.after_initialize();
+    }
   },
 
   create_room: function(id, name, skip_refresh) {
@@ -78,4 +82,7 @@ function socket_bridge_onload() {
     },
   });
   socket.connect('127.0.0.1', '2045');
+}
+
+function after_initialize() {
 }

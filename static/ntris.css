@@ -32,6 +32,20 @@ body {
   height: 541px;
 }
 
+.room-tab[aria-hidden='true'] {
+  display: block !important;
+  border:none!important;
+  visibility:hidden!important;
+}
+
+.room-tab[aria-hidden='true'],
+.room-tab[aria-hidden='true'] * {
+  height: 0!important;
+  width: 0!important;
+  margin: 0!important;
+  padding: 0!important;
+}
+
 .container {
   float: left;
   margin: 8px;
