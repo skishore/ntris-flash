@@ -4,4 +4,4 @@ Board.swf: *.as
 all: Board.swf
 
 clean:
-	rm -f *.swf
+	rm -f Board.swf
