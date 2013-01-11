@@ -39,7 +39,7 @@ var ntris = {
     room.find(target).append(html);
 
     var size = (large ? 16 : 8);
-    ntris.create_board(id, size);
+    this.create_board(id, size);
   },
 
   create_board: function(id, squareWidth) {
@@ -59,20 +59,31 @@ var ntris = {
   log_framerate: function(id, framerate) {
     //console.log('FPS (' + id + '): ' + framerate);
   },
+
+  connected: function() {
+    $('#topbar').removeClass('connecting');
+    $('#topbar').addClass('connected');
+    $('#topbar').html('Status: connected!');
+  },
+
+  disconnected: function() {
+    $('#topbar').removeClass('connecting connected');
+    $('#topbar').html('Status: disconnected.');
+  },
 };
 
 var socket;
 function socket_bridge_onload() {
   socket = new FlashSocket({
     on_connect: function() {
-      console.log('Connected!');
+      ntris.connected()
       this.sendLine('<connection-made>')
     },
     on_data: function(data) {
       console.log(data);
     },
     on_close: function() {
-      console.log('Lost connection.');
+      ntris.disconnected()
     },
     on_io_error: function(err) {
       console.log('IO error: ', err);

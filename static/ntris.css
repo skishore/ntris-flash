@@ -13,10 +13,20 @@ body {
 }
 
 #topbar {
-  background-color: #CCF;
-  border: 1px solid #668;
+  background-color: #FCC;
+  border: 1px solid #866;
   padding: 2px;
   width: 1240px;
+}
+
+#topbar.connecting {
+  background-color: #CCF;
+  border: 1px solid #668;
+}
+
+#topbar.connected {
+  background-color: #CFC;
+  border: 1px solid #686;
 }
 
 #tabs {
