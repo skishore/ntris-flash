@@ -4,6 +4,7 @@ import flash.events.SecurityErrorEvent;
 import flash.events.ProgressEvent;
 import flash.external.ExternalInterface;
 import flash.net.Socket;
+import flash.utils.ByteArray;
 
 class SocketBridge {
     public static var sockets:Hash<Socket> = new Hash();
@@ -30,8 +31,16 @@ class SocketBridge {
     public static function handle_data(id:String, event) {
         var socket:Socket = sockets.get(id);
         if (socket != null)  {
-            var msg = socket.readUTFBytes(socket.bytesAvailable);
-            ExternalInterface.call("(function(id, data){ var inst = window.FlashSocket._instances[id]; if (inst.on_data) inst.on_data(data);})", id, msg);
+            var bytes:ByteArray = new ByteArray();
+            socket.readBytes(bytes, 0, socket.bytesAvailable);
+            var messages = bytes.toString().split("\x00");
+            for (i in 0...(messages.length - 1)) {
+              ExternalInterface.call("(function(id, data){ var inst = window.FlashSocket._instances[id]; if (inst.on_data) inst.on_data(data);})", id, messages[i]);
+            }
+            // This is the library's old code, which misses packets that are sent in quick succession.
+            // (If there are multiple packets in the socket's buffer, readUTFBytes will only read the first.)
+            //var msg = socket.readUTFBytes(socket.bytesAvailable);
+            //ExternalInterface.call("(function(id, data){ var inst = window.FlashSocket._instances[id]; if (inst.on_data) inst.on_data(data);})", id, msg);
         }
     }
 
