@@ -99,7 +99,16 @@ body {
   border: solid #AAA;
   border-width: 0px 1px;
   height: 220px;
-  width: 100%;
+  width: 328;
+
+  font-size: 12px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.chat-name {
+  font-weight: bold;
 }
 
 .ui-menu {

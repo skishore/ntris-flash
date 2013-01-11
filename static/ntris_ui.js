@@ -14,36 +14,46 @@ var ntris_ui = {
   },
 
   create_room_tab: function(room, set_active) {
-    var id = room + '-room';
-    var name = room[0].toUpperCase() + room.slice(1);
-    roomHTML = '<div class="room-tab" id="' + id + '">' + this._room_prototype;
-    $('#tablist').append('<li><a href="#' + id + '">' + name + '</a></li>');
+    var label = room.name[0].toUpperCase() + room.name.slice(1);
+    roomHTML = '<div class="room-tab" id="' + room.id + '">' + this._room_prototype;
+    $('#tablist').append('<li><a href="#' + room.id + '">' + label + '</a></li>');
     $('#tabs').append(roomHTML);
 
-    var room = $('#' + id);
-    room.find('.users').menu();
-    room.find('.rooms').menu();
+    $('#' + room.id).find('.users').menu();
+    $('#' + room.id).find('.rooms').menu();
     $('#tabs').tabs('refresh');
 
     if (set_active) {
       var num_tabs = $('#tabs').find('.room-tab').length;
       $('#tabs').tabs('option', 'active', num_tabs - 1);
     }
+
+    $('#' + room.id).find('.chat').keydown(function(e) {
+      if (e.keyCode == 13) {
+        var message = this.value;
+        this.value = '';
+        ntris.send_chat_message(room, message);
+      }
+    });
   },
 
-  add_user_to_room: function(room, user) {
-    var id = room + '-' + user + '-user';
-    var html = '<li><a id="' + id + '" href="#">' + user + '</a></li>';
-    var user_list = $('#' + room + '-room').find('.users');
+  add_user_to_room: function(user, room) {
+    var html = '<li><a class="' + user.cls + '" href="#">' + user.name + '</a></li>';
+    var user_list = $('#' + room.id).find('.users');
     user_list.append(html);
     user_list.menu('refresh');
   },
 
-  remove_user_from_room: function(room, user) {
-    var id = room + '-' + user + '-user';
-    var user_list = $('#' + room + '-room').find('.users');
-    user_list.find('#' + id).remove();
+  remove_user_from_room: function(user, room) {
+    var user_list = $('#' + room.id).find('.users');
+    user_list.find('.' + user.cls).remove();
     user_list.menu('refresh');
+  },
+
+  chat: function(room, user, message) {
+    var html = ('<div class="chat-message"><span class="chat-name">'
+        + user.name + ':</span> ' + message + '</div>');
+    $('#' + room.id).find('.chatbox').append(html);
   },
 
   launch_game: function(room, user, large) {
