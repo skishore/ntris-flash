@@ -31,8 +31,10 @@ var ntris_ui = {
     $('#' + room.id).find('.chat').keydown(function(e) {
       if (e.keyCode == 13) {
         var message = this.value;
-        this.value = '';
-        ntris.send_chat_message(room, message);
+        if (message) {
+          this.value = '';
+          ntris.send_chat_message(room, message);
+        }
       }
     });
   },
@@ -53,7 +55,12 @@ var ntris_ui = {
   chat: function(room, user, message) {
     var html = ('<div class="chat-message"><span class="chat-name">'
         + user.name + ':</span> ' + message + '</div>');
-    $('#' + room.id).find('.chatbox').append(html);
+    var elt = $('#' + room.id).find('.chatbox');
+    var at_bottom = this.at_bottom(elt);
+    elt.append(html);
+    if (at_bottom) {
+      this.scroll_to_bottom(elt);
+    }
   },
 
   launch_game: function(room, user, large) {
@@ -83,5 +90,13 @@ var ntris_ui = {
   disconnected: function() {
     $('#topbar').removeClass('connecting connected');
     $('#topbar').html('Status: disconnected.');
+  },
+
+  at_bottom: function(elt) {
+    return elt.scrollTop() + elt.innerHeight() == elt[0].scrollHeight;
+  },
+
+  scroll_to_bottom: function(elt) {
+    elt.scrollTop(elt[0].scrollHeight);
   },
 };
