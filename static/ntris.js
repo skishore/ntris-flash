@@ -45,7 +45,7 @@ var ntris = {
   create_board: function(id, squareWidth) {
     var width = 14*squareWidth + Math.floor(7*squareWidth/2);
     var height = 26*squareWidth;
-    swfobject.embedSWF('Board.swf', id, width, height, '10', null, {
+    swfobject.embedSWF('Board/Board.swf', id, width, height, '10', null, {
       html_id: id,
       squareWidth: squareWidth,
     });
