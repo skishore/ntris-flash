@@ -142,10 +142,15 @@ body {
   margin-bottom: 8px;
 }
 
+.board, .large-board {
+  float: right;
+}
+
 .large-board.container {
   margin-top: 24px;
+  margin-left: 4px;
+  margin-right: 12px;
   width: 280px;
-  height: auto,
 }
 
 .large-board {
@@ -154,6 +159,8 @@ body {
 }
 
 .board.container {
+  margin-left: 4px;
+  margin-right: 12px;
   width: 140px;
   height: auto;
 }
