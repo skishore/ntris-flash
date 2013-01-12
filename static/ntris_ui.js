@@ -10,7 +10,7 @@ var ntris_ui = {
   connected: function() {
     $('#topbar').removeClass('connecting');
     $('#topbar').addClass('connected');
-    $('#topbar').html('Status: connected!');
+    $('#topbar').html('Status: in guest mode as ' + ntris.user.name);
   },
 
   create_room_tab: function(room, set_active) {
@@ -91,6 +91,10 @@ var ntris_ui = {
       local: local,
       squareWidth: squareWidth,
     });
+  },
+
+  drop_board: function(board) {
+    $(board.swf.parentElement).remove();
   },
 
   disconnected: function() {

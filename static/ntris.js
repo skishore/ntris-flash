@@ -57,6 +57,7 @@ var ntris = {
     var id = room.id + '-' + user.cls + '-board';
     if (!this.boards.hasOwnProperty(id)) {
       var board = {
+        id: id,
         initialized: false,
       };
       if (user === this.user) {
@@ -83,11 +84,34 @@ var ntris = {
   },
 
   remove_user_from_room: function(user, room) {
+    if (user === this.user) {
+      console.debug('Should never have to remove this user from a room!');
+      return;
+    }
     var index = room.members.indexOf(user);
     if (index != -1) {
       room.members.splice(index, 1);
       user.rooms.splice(user.rooms.indexOf(room), 1);
+      this.drop_board_if_exists(user, room);
       this.ui.remove_user_from_room(user, room);
+      if (!user.rooms.length) {
+        delete this.users[user.sid];
+      }
+    }
+  },
+
+  drop_board_if_exists: function(user, room) {
+    var id = room.id + '-' + user.cls + '-board';
+    if (this.boards.hasOwnProperty(id)) {
+      var board = this.boards[id];
+      var local = (user === this.user);
+      if (local) {
+        room.local_board = null;
+      } else {
+        room.num_remote_boards--;
+      }
+      this.ui.drop_board(board);
+      delete this.boards[board.id];
     }
   },
 
@@ -104,7 +128,7 @@ var ntris = {
       board.swf.start();
     } else if (board.json) {
       board.swf.deserialize(board.json);
-      board.json = undefined;
+      delete board.json;
     }
   },
 
@@ -130,7 +154,7 @@ var ntris = {
           users_to_remove.push(room.members[i]);
         }
       }
-      for (i = 0; i < room.members.length; i++) {
+      for (i = 0; i < users_to_remove.length; i++) {
         this.remove_user_from_room(users_to_remove[i], room);
       }
     }
