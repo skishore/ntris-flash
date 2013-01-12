@@ -23,7 +23,10 @@ package {
   import KeyRepeater;
 
   public class Board extends MovieClip {
-    private static const debug:Boolean = true;
+    private static const DEBUG:Boolean = true;
+
+    // Variables read from flashVars. SQUAREWIDTH is also set by flashVars.
+    private static var html_id:String;
     private static var local:Boolean;
 
     // Board size constants.
@@ -140,11 +143,13 @@ package {
       lastPos = new Point();
       optimize = false;
 
+      html_id = flashVars().html_id;
       local = (flashVars().local == 'true');
       setSquareWidth(flashVars().squareWidth);
       ExternalInterface.addCallback('start', startTimer);
       ExternalInterface.addCallback('pause', pauseTimer);
-      ExternalInterface.call('ntris.board_callback', flashVars().html_id, local);
+      ExternalInterface.addCallback('deserialize', deserialize);
+      ExternalInterface.call('ntris.board_callback', html_id, local);
     }
 
     private function flashVars():Object {
@@ -233,7 +238,7 @@ package {
       numFrames++;
       if (beforeTime > lastSecond + 1000) {
         var framesPerSecond:Number = 1000.0*numFrames/(beforeTime - lastSecond);
-        if (debug) {
+        if (DEBUG) {
           ExternalInterface.call('ntris.log_framerate',
               flashVars().html_id, framesPerSecond.toPrecision(4));
         }
@@ -249,7 +254,7 @@ package {
         }
       } else {
         if (local && !optimize) {
-          //ExternalInterface.call('console.log', serialize());
+          ExternalInterface.call('ntris.send_board_update', html_id, serialize());
         }
         draw();
       }
@@ -797,13 +802,45 @@ package {
     // Serialization / deserialization code here!
     private function serialize():String {
       var curBlockType:int = (curBlock == null ? -1 : curBlock.type);
-      var representation:Array = [
+      var vals:Array = [
+        state,
         data,
         curBlockType,
         heldBlockType,
         preview
       ];
-      return JSON.stringify(representation);
+      return JSON.stringify(vals);
+    }
+
+    private function deserialize(json:String):void {
+      var vals:Object = JSON.parse(json);
+
+      state = vals[0];
+      for (var i:int = 0; i < ROWS; i++) {
+        for (var j:int = 0; j < COLS; j++) {
+          data[i][j] = vals[1][i][j];
+        }
+      }
+
+      var curBlockType:int = vals[2];
+      if (curBlockType == -1) {
+        curBlock = null;
+      } else {
+        curBlock = new Block(curBlockType);
+        curBlock.x += COLS/2;
+        curBlock.y += Block.MAXBLOCKSIZE - curBlock.height;
+        curBlock.rowsFree = calculateRowsFree(curBlock);
+      }
+
+      heldBlockType = vals[3];
+      var previewLength:int = (vals[4] as Array).length;
+      preview.length = 0;
+      for (i = 0; i < previewLength; i++) {
+        preview.push(vals[4][i]);
+      }
+
+      optimize = false;
+      draw();
     }
   }
 }

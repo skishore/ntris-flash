@@ -68,10 +68,10 @@ var ntris_ui = {
     }
   },
 
-  create_game: function(room, user, local) {
+  create_board: function(room, user, local) {
     var target = (local ? '.large-boards' : '.boards');
     var cls = target.slice(1, target.length - 1);
-    var id = room.id + '-' + user.cls + '-' + cls;
+    var id = room.id + '-' + user.cls + '-board';
 
     var html = '<div class="' + cls + ' container">';
     html += '<div class="header">' + user.name + '</div>';
@@ -79,10 +79,10 @@ var ntris_ui = {
     $('#' + room.id).find(target).append(html);
 
     var size = (local ? 16 : 8);
-    this.create_game_on_div(id, size, local);
+    this.create_board_on_div(id, size, local);
   },
 
-  create_game_on_div: function(id, squareWidth, local) {
+  create_board_on_div: function(id, squareWidth, local) {
     local = (local ? 'true' : 'false');
     var width = 14*squareWidth + Math.floor(7*squareWidth/2);
     var height = 26*squareWidth;

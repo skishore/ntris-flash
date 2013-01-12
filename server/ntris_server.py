@@ -16,10 +16,6 @@ POLICY_FILE = '''
 ''' % (PORT,)
 CONNECTION_MADE = '<connection-made>'
 
-HANDLERS = {}
-def handler(f):
-  HANDLERS[f.__name__[3:]] = f
-
 class ntrisSession(LineReceiver):
   delimiter = '\0'
 
@@ -33,7 +29,6 @@ class ntrisSession(LineReceiver):
     return dict(
         sid=self.sid,
         name=self.name,
-        rooms=self.rooms.keys(),
       )
 
   def connectionMade(self):
@@ -58,10 +53,8 @@ class ntrisSession(LineReceiver):
     if type == 'get_username' and self.sid is None:
       self.create_user(data['sid'], data['name'])
     elif self.sid is not None:
-      if type in HANDLERS:
-        HANDLERS[type](self, data)
-      else:
-        print 'Unexpected message: %s (data: %s)' % (type, data)
+      data.update(self.to_dict())
+      self.rooms[data['room']].broadcast(type, data)
 
   def send_message(self, type, data):
     self.sendLine(json.dumps([type, data]))
@@ -77,12 +70,6 @@ class ntrisSession(LineReceiver):
     self.server.sessions[self.sid] = self
     self.server.rooms['lobby'].add_user(self)
 
-  @handler
-  def on_chat(self, data):
-    if data['room'] in self.rooms:
-      data.update(self.to_dict())
-      self.rooms[data['room']].broadcast('chat', data)
-
 class ntrisRoom(object):
   def __init__(self, name):
     self.name = name
@@ -90,7 +77,7 @@ class ntrisRoom(object):
 
   def to_dict(self):
     return dict(
-        name=self.name,
+        room=self.name,
         members=[session.to_dict() for session in self.members.itervalues()],
       )
 
