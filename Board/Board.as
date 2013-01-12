@@ -121,8 +121,13 @@ package {
     private var optimize:Boolean;
 
     public function Board() {
+      html_id = flashVars().html_id;
+      local = (flashVars().local == 'true');
+      setSquareWidth(flashVars().squareWidth);
+
       stage.align = StageAlign.TOP_LEFT;
       stage.scaleMode = StageScaleMode.NO_SCALE;
+      initGraphics();
 
       Block.loadBlockData();
 
@@ -133,19 +138,18 @@ package {
       }
       data.fixed = true;
 
-      repeater = new KeyRepeater(PAUSE, REPEAT);
-      stage.addEventListener(KeyboardEvent.KEY_DOWN, repeater.keyPressed);
-      stage.addEventListener(KeyboardEvent.KEY_UP, repeater.keyReleased);
-      keysFired = new Vector.<int>();
+      if (local) {
+        repeater = new KeyRepeater(PAUSE, REPEAT);
+        stage.addEventListener(KeyboardEvent.KEY_DOWN, repeater.keyPressed);
+        stage.addEventListener(KeyboardEvent.KEY_UP, repeater.keyReleased);
+        keysFired = new Vector.<int>();
+      }
 
       resetBoard();
 
       lastPos = new Point();
       optimize = false;
 
-      html_id = flashVars().html_id;
-      local = (flashVars().local == 'true');
-      setSquareWidth(flashVars().squareWidth);
       ExternalInterface.addCallback('start', startTimer);
       ExternalInterface.addCallback('pause', pauseTimer);
       ExternalInterface.addCallback('deserialize', deserialize);
@@ -180,7 +184,6 @@ package {
 
       xPos = BORDER;
       yPos = BORDER;
-      initGraphics();
     }
 
     private function initGraphics():void {
@@ -191,18 +194,21 @@ package {
       redTint.redMultiplier = 0.5;
       redTint.redOffset = 128;
 
+      var large:Boolean = (SQUAREWIDTH > 10);
+
       scoreText = new TextField();
       scoreText.x = BORDER + SQUAREWIDTH*COLS + 3*SQUAREWIDTH/4;
       scoreText.y = HEIGHT - BORDER - 2*SQUAREWIDTH;
-      scoreText.width = SIDEBOARD - SQUAREWIDTH;
+      scoreText.width = SIDEBOARD - SQUAREWIDTH + (large ? 0 : SQUAREWIDTH/2);
       scoreText.textColor = 0xffffff;
       var scoreFormat:TextFormat = new TextFormat();
       scoreFormat.align = TextFormatAlign.RIGHT;
+      scoreFormat.size = (large ? 14 : 12);
       scoreText.defaultTextFormat = scoreFormat;
 
       stateText = new TextField();
       stateText.width = Math.min(192, SQUAREWIDTH*COLS + SIDEBOARD);
-      stateText.height = 38;
+      stateText.height = (large ? 38 : 30);
       stateText.x = (WIDTH - stateText.width)/2;
       stateText.y = (HEIGHT - stateText.height)/2;
       stateText.textColor = 0xffffff;
@@ -210,7 +216,7 @@ package {
       stateText.backgroundColor = Color.BLACK;
       var stateFormat:TextFormat = new TextFormat();
       stateFormat.align = TextFormatAlign.CENTER;
-      stateFormat.size = 14;
+      stateFormat.size = (large ? 14 : 10);
       stateText.defaultTextFormat = stateFormat;
     }
 
@@ -807,7 +813,8 @@ package {
         data,
         curBlockType,
         heldBlockType,
-        preview
+        preview,
+        score
       ];
       return JSON.stringify(vals);
     }
@@ -838,6 +845,7 @@ package {
       for (i = 0; i < previewLength; i++) {
         preview.push(vals[4][i]);
       }
+      score = vals[5];
 
       optimize = false;
       draw();
