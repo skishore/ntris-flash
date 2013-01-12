@@ -136,14 +136,6 @@ var ntris = {
     }
   },
 
-  on_chat: function(data) {
-    if (this.rooms.hasOwnProperty(data.room)) {
-      var room = this.rooms[data.room];
-      var user = this.create_user(data.sid, data.name);
-      this.ui.chat(room, user, data.message);
-    }
-  },
-
   on_board_update: function(data) {
     if (this.rooms.hasOwnProperty(data.room) &&
         data.sid != this.user.sid) {
@@ -155,6 +147,14 @@ var ntris = {
       } else {
         board.json = data.json;
       }
+    }
+  },
+
+  on_chat: function(data) {
+    if (this.rooms.hasOwnProperty(data.room)) {
+      var room = this.rooms[data.room];
+      var user = this.create_user(data.sid, data.name);
+      this.ui.chat(room, user, data.message);
     }
   },
 
