@@ -24,6 +24,7 @@ package {
 
   public class Board extends MovieClip {
     private static const debug:Boolean = true;
+    private static var local:Boolean;
 
     // Board size constants.
     private static const VISIBLEROWS:int = 24;
@@ -139,10 +140,11 @@ package {
       lastPos = new Point();
       optimize = false;
 
+      local = (flashVars().local == 'true');
       setSquareWidth(flashVars().squareWidth);
       ExternalInterface.addCallback('start', startTimer);
       ExternalInterface.addCallback('pause', pauseTimer);
-      ExternalInterface.call('ntris.board_callback', flashVars().html_id);
+      ExternalInterface.call('ntris.board_callback', flashVars().html_id, local);
     }
 
     private function flashVars():Object {
@@ -246,6 +248,9 @@ package {
           update();
         }
       } else {
+        if (local && !optimize) {
+          //ExternalInterface.call('console.log', serialize());
+        }
         draw();
       }
 
@@ -596,6 +601,8 @@ package {
         }
       } else if (optimize) {
         return;
+      } else {
+        optimize = true;
       }
 
       canvasBD.lock();
@@ -785,6 +792,18 @@ package {
       for (var i:int = 0; i < l; i++) {
         bd.setPixel(x + i, y - i, c);
       }
+    }
+
+    // Serialization / deserialization code here!
+    private function serialize():String {
+      var curBlockType:int = (curBlock == null ? -1 : curBlock.type);
+      var representation:Array = [
+        data,
+        curBlockType,
+        heldBlockType,
+        preview
+      ];
+      return JSON.stringify(representation);
     }
   }
 }

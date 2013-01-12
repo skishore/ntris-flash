@@ -1,3 +1,7 @@
+function randint(a, b) {
+  return Math.floor(a + (b - a)*Math.random());
+};
+
 var ntris = {
   ui: ntris_ui,
 
@@ -8,6 +12,11 @@ var ntris = {
   initialize: function() {
     this.ui.initialize();
     this.create_room('lobby');
+
+    var sid = randint(0, 1 << 30);
+    var name = 'guest' + randint(100000, 999999);
+    this.user = this.create_user(sid, name);
+
     if (window.hasOwnProperty('after_initialize')) {
       window.after_initialize();
     }
@@ -59,13 +68,22 @@ var ntris = {
     }
   },
 
-  on_connect: function() {
-    this.socket.sendLine('<connection-made>')
-    this.ui.connected();
+  play_singleplayer: function() {
+    var room = this.rooms[this.ui.current_room_name()];
+    this.ui.create_game(room, this.user, true);
   },
 
-  on_get_username: function(data) {
-    this.user = this.create_user(data.sid, data.name);
+  board_callback: function(id, local) {
+    if (local) {
+      var board = $('#' + id)[0];
+      board.start();
+    }
+  },
+
+  on_connect: function() {
+    var line = JSON.stringify(['get_username', this.user]);
+    this.socket.sendLine(line)
+    this.ui.connected();
   },
 
   on_room_update: function(data) {
@@ -105,11 +123,6 @@ var ntris = {
       message: message,
     }]);
     this.socket.sendLine(line);
-  },
-
-  board_callback: function(id) {
-    var board = $('#' + id)[0];
-    board.start();
   },
 
   log_framerate: function(id, framerate) {

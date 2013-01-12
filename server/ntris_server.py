@@ -53,10 +53,11 @@ class ntrisSession(LineReceiver):
   def lineReceived(self, line):
     if line == POLICY_FILE_REQUEST:
       self.sendLine(POLICY_FILE)
-    elif line == CONNECTION_MADE and self.sid is None:
-      self.create_user()
+      return
+    (type, data) = json.loads(line)
+    if type == 'get_username' and self.sid is None:
+      self.create_user(data['sid'], data['name'])
     elif self.sid is not None:
-      (type, data) = json.loads(line)
       if type in HANDLERS:
         HANDLERS[type](self, data)
       else:
@@ -65,16 +66,15 @@ class ntrisSession(LineReceiver):
   def send_message(self, type, data):
     self.sendLine(json.dumps([type, data]))
 
-  def create_user(self):
-    self.server.last_sid += 1
-    self.sid = self.server.last_sid
-    self.name = 'guest%s' % (randint(1000, 9999),)
+  def create_user(self, sid, name):
+    print 'Connection by %s; (sid %s, address %s)' % (name, sid, self.addr)
+    if sid in self.server.sessions:
+      print 'Duplicate connection! Closing socket.'
+      self.transport.loseConnection()
+      return
+    self.sid = sid
+    self.name = name
     self.server.sessions[self.sid] = self
-    print 'Connection by %s; session id %s' % (self.addr, self.sid)
-    self.send_message('get_username', dict(
-        sid=self.sid,
-        name=self.name,
-      ))
     self.server.rooms['lobby'].add_user(self)
 
   @handler
@@ -114,7 +114,6 @@ class ntrisRoom(object):
 
 class ntrisServer(ServerFactory):
   def __init__(self):
-    self.last_sid = -1
     self.sessions = {}
     self.rooms = {'lobby': ntrisRoom('lobby')}
 

@@ -39,6 +39,11 @@ var ntris_ui = {
     });
   },
 
+  current_room_name: function() {
+    var room_tab = $('.room-tab')[$('#tabs').tabs('option', 'active')];
+    return room_tab.id.substr(0, room_tab.id.length - 5);
+  },
+
   add_user_to_room: function(user, room) {
     var html = '<li><a class="' + user.cls + '" href="#">' + user.name + '</a></li>';
     var user_list = $('#' + room.id).find('.users');
@@ -63,26 +68,27 @@ var ntris_ui = {
     }
   },
 
-  launch_game: function(room, user, large) {
-    var target = (large ? '.large-boards' : '.boards');
+  create_game: function(room, user, local) {
+    var target = (local ? '.large-boards' : '.boards');
     var cls = target.slice(1, target.length - 1);
-    var id = room + '-' + user + '-' + cls;
+    var id = room.id + '-' + user.cls + '-' + cls;
 
-    var room = $('#' + room);
     var html = '<div class="' + cls + ' container">';
-    html += '<div class="header">' + user + '</div>';
+    html += '<div class="header">' + user.name + '</div>';
     html += '<div id="' + id + '" class="' + cls + '"></div></div>';
-    room.find(target).append(html);
+    $('#' + room.id).find(target).append(html);
 
-    var size = (large ? 16 : 8);
-    this.create_board(id, size);
+    var size = (local ? 16 : 8);
+    this.create_game_on_div(id, size, local);
   },
 
-  create_board: function(id, squareWidth) {
+  create_game_on_div: function(id, squareWidth, local) {
+    local = (local ? 'true' : 'false');
     var width = 14*squareWidth + Math.floor(7*squareWidth/2);
     var height = 26*squareWidth;
-    swfobject.embedSWF('Board/Board.swf', id, width, height, '10', null, {
+    swfobject.embedSWF('Board/Board.swf', id, width, height, '11', null, {
       html_id: id,
+      local: local,
       squareWidth: squareWidth,
     });
   },
