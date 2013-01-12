@@ -4,6 +4,24 @@ body {
   width: 98%;
 }
 
+.ui-dialog fieldset {
+  background: #EEE;
+}
+
+.ui-dialog label {
+  float: right;
+}
+
+.ui-dialog table {
+  font-size: 12px;
+}
+
+.error {
+  color: red;
+  height: 12px;
+  margin-top: -4px;
+}
+
 #socket_bridge {
   position: absolute;
   left: -1px;

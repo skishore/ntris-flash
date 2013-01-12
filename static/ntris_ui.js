@@ -5,6 +5,56 @@ var ntris_ui = {
     $('button').button().click(function(event) {
       event.preventDefault();
     });
+
+    var attrs = {
+      autoOpen: false,
+      resizable: false,
+      modal: true,
+      width: 400,
+    };
+
+    function submit_login() {
+      console.debug('Login:', $('#login-username').val(), $('#login-password').val());
+      $('#login-dialog').dialog('close');
+    };
+    $('#login-dialog').dialog($.extend(attrs, {
+     buttons: {
+        Submit: submit_login,
+        Cancel: function() {
+          $('#login-dialog').dialog('close');
+        },
+      },
+    }));
+    $('#login-password').keydown(function(e) {
+      if (e.keyCode == 13) submit_login();
+    });
+
+    function submit_signup() {
+      console.debug('Signup:', $('#signup-username').val(), $('#signup-email').val(),
+                    $('#signup-password').val(), $('#retype-password').val());
+      $('#signup-dialog').dialog('close');
+    };
+    $('#signup-dialog').dialog($.extend(attrs, {
+     buttons: {
+        Submit: submit_signup,
+        Cancel: function() {
+          $('#signup-dialog').dialog('close');
+        },
+      },
+    }));
+    $('#retype-password').keydown(function(e) {
+      if (e.keyCode == 13) submit_signup();
+    });
+  },
+
+  show_login_dialog: function() {
+    $('#login-dialog').find('input').val('');
+    $('#login-dialog').dialog('open');
+  },
+
+  show_signup_dialog: function() {
+    $('#signup-dialog').find('input').val('');
+    $('#signup-dialog').dialog('open');
   },
 
   connected: function() {
