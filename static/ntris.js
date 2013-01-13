@@ -102,7 +102,7 @@ var ntris = {
         remote_boards: {},
       };
       this.rooms[name] = room;
-      this.ui.create_room_tab(room, true);
+      this.ui.create_room_tab(room);
     }
     return this.rooms[name];
   },

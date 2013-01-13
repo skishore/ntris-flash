@@ -145,7 +145,7 @@ var ntris_ui = {
     }
   },
 
-  create_room_tab: function(room, set_active) {
+  create_room_tab: function(room) {
     roomHTML = '<div class="room-tab" id="' + room.id + '">' + this._room_prototype;
     $('#tablist').append('<li><a href="#' + room.id + '">' + room.label + '</a></li>');
     $('#tabs').append(roomHTML);
@@ -172,10 +172,8 @@ var ntris_ui = {
     });
 
     $('#tabs').tabs('refresh');
-    if (set_active) {
-      var num_tabs = $('.room-tab').length;
-      $('#tabs').tabs('option', 'active', num_tabs - 1);
-    }
+    var num_tabs = $('.room-tab').length;
+    $('#tabs').tabs('option', 'active', num_tabs - 1);
   },
 
   current_room_name: function() {
