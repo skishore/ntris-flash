@@ -258,10 +258,11 @@ package {
         for (var i:int = 0; i < extraFrames; i++) {
           update();
         }
-      } else {
-        if (local && !optimize) {
-          ExternalInterface.call('ntris.send_board_update', html_id, serialize());
-        }
+      }
+      if (local && !optimize) {
+        ExternalInterface.call('ntris.send_board_update', html_id, serialize());
+      }
+      if (extraFrames <= 1) {
         draw();
       }
 
