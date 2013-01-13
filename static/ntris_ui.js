@@ -71,30 +71,30 @@ var ntris_ui = {
     $('#join-room-dialog').dialog($.extend(attrs, {}));
   },
 
-  show_join_room_dialog: function(data) {
-    if (data.size == 1) {
-      $('#room-details').html('There is 1 user in ' + data.label + '.');
+  show_join_room_dialog: function(name, label, size, in_game) {
+    if (size == 1) {
+      $('#room-details').html('There is 1 user in ' + label + '.');
     } else {
-      $('#room-details').html('There are ' + data.size + ' users in ' + data.label + '.');
+      $('#room-details').html('There are ' + size + ' users in ' + label + '.');
     }
 
     var buttons = {};
-    if (ntris.rooms.hasOwnProperty(data.name)) {
+    if (ntris.rooms.hasOwnProperty(name)) {
       $('#room-membership').html('You are a member of this room.');
       buttons['Go to'] = function() {
-          ntris.ui.change_rooms(data.name);
+          ntris.ui.change_rooms(name);
           $('#join-room-dialog').dialog('close');
         };
-      if (data.name != 'lobby') {
+      if (name != 'lobby') {
         buttons.Leave = function() {
             ntris.submit_join_room($('#join-room-name').val(), 'leave_room');
           };
       }
     } else {
-      if (data.in_game) {
+      if (in_game) {
         $('#room-membership').html('The players in this room are in a multiplayer game. ' +
                                    'You can spectate from the lobby.');
-      } else if (data.size >= 6) {
+      } else if (size >= 6) {
         $('#room-membership').html('This room is full, but you can spectate from the lobby.');
       } else {
         $('#room-membership').html('You can join this room or spectate from the lobby.');
@@ -112,7 +112,7 @@ var ntris_ui = {
     $('#join-room-dialog').dialog('option', 'buttons', buttons);
 
     this.show_dialog('join-room');
-    $('#join-room-name').val(data.name);
+    $('#join-room-name').val(name);
   },
 
   show_dialog: function(dialog) {
@@ -151,6 +151,9 @@ var ntris_ui = {
     $('#tabs').append(roomHTML);
 
     $('#' + room.id).find('.users').menu();
+    // TODO: Links copied from the lobby do not have an onlick.
+    // This is okay because the rooms div will be replaced by a game div
+    // in other rooms, but they're broken for now.
     var rooms_list = $('#' + room.id).find('.rooms');
     var room_links = $('#lobby-room').find('.rooms').find('li');
     for (var i = 0; i < room_links.length; i++) {
@@ -170,7 +173,7 @@ var ntris_ui = {
 
     $('#tabs').tabs('refresh');
     if (set_active) {
-      var num_tabs = $('#tabs').find('.room-tab').length;
+      var num_tabs = $('.room-tab').length;
       $('#tabs').tabs('option', 'active', num_tabs - 1);
     }
   },
@@ -196,16 +199,9 @@ var ntris_ui = {
   update_room_sizes: function(name, label, size) {
     var cls = name + '-size';
     if (size) {
-      var data = {
-        name: name,
-        label: label,
-        size: size,
-      };
-      var onclick = "onclick='ntris.ui.show_join_room_dialog(" + JSON.stringify(data) + ")'";
-
       var link_html = label + ' (' + size + (name == 'lobby' ? ')' : '/6)');
-      var new_li = '<li><a class="' + cls + '" ' + onclick + '>' + link_html + '</a></li>';
-      $('.rooms').each(function() {
+      var new_li = '<li><a class="' + cls + '">' + link_html + '</a></li>';
+      $('.room-tab .rooms').each(function() {
         var link = $(this).find('.' + cls);
         if (link.length) {
           link.html(link_html);
@@ -214,8 +210,11 @@ var ntris_ui = {
           $(this).menu('refresh');
         }
       });
+      $('.' + cls).click(function() {
+        ntris.ui.show_join_room_dialog(name, label, size);
+      });
     } else {
-      $('.' + cls).remove();
+      $($('.' + cls).parent()).remove();
     }
   },
 
