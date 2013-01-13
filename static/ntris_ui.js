@@ -14,8 +14,7 @@ var ntris_ui = {
     };
 
     function submit_login() {
-      console.debug('Login:', $('#login-username').val(), $('#login-password').val());
-      $('#login-dialog').dialog('close');
+      ntris.login($('#login-username').val(), $('#login-password').val());
     };
     $('#login-dialog').dialog($.extend(attrs, {
      buttons: {
@@ -30,9 +29,8 @@ var ntris_ui = {
     });
 
     function submit_signup() {
-      console.debug('Signup:', $('#signup-username').val(), $('#signup-email').val(),
-                    $('#signup-password').val(), $('#retype-password').val());
-      $('#signup-dialog').dialog('close');
+      ntris.signup($('#signup-username').val(), $('#signup-email').val(),
+                   $('#signup-password').val(), $('#retype-password').val());
     };
     $('#signup-dialog').dialog($.extend(attrs, {
      buttons: {
@@ -48,19 +46,42 @@ var ntris_ui = {
   },
 
   show_login_dialog: function() {
+    this.set_login_error('');
     $('#login-dialog').find('input').val('');
     $('#login-dialog').dialog('open');
   },
 
   show_signup_dialog: function() {
+    this.set_signup_error('');
     $('#signup-dialog').find('input').val('');
     $('#signup-dialog').dialog('open');
+  },
+
+  set_login_error: function(error) {
+    $('#login-dialog').find('.error').html(error);
+  },
+
+  set_signup_error: function(error) {
+    $('#signup-dialog').find('.error').html(error);
+  },
+
+  close_dialogs: function() {
+    $('#login-dialog').dialog('close');
+    $('#signup-dialog').dialog('close');
   },
 
   connected: function() {
     $('#topbar').removeClass('connecting');
     $('#topbar').addClass('connected');
     $('#topbar').html('Status: in guest mode as ' + ntris.user.name);
+  },
+
+  change_username: function(name, in_guest_mode) {
+    if (in_guest_mode) {
+      $('#topbar').html('Status: in guest mode as ' + name);
+    } else {
+      $('#topbar').html('Status: logged in as ' + name);
+    }
   },
 
   create_room_tab: function(room, set_active) {
@@ -99,6 +120,10 @@ var ntris_ui = {
     var user_list = $('#' + room.id).find('.users');
     user_list.append(html);
     user_list.menu('refresh');
+  },
+
+  change_username_in_room: function(user, room) {
+    $('#' + room.id).find('.' + user.cls).html(user.name);
   },
 
   remove_user_from_room: function(user, room) {

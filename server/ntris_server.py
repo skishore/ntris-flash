@@ -1,4 +1,6 @@
 import json
+import md5
+import MySQLdb
 from random import randint
 
 from twisted.internet import reactor
@@ -7,14 +9,21 @@ from twisted.internet.protocol import (
   )
 from twisted.protocols.basic import LineReceiver
 
-PORT = 2045
-POLICY_FILE_REQUEST = '<policy-file-request/>'
-POLICY_FILE = '''
+port = 2045
+policy_file_request = '<policy-file-request/>'
+policy_file = '''
 <cross-domain-policy>
   <allow-access-from domain="*" to-ports="%s" />
 </cross-domain-policy>
-''' % (PORT,)
-CONNECTION_MADE = '<connection-made>'
+''' % (port,)
+
+password = open('../passwords/skishore@sql.mit.edu:skishore+ntris').read().strip()
+conn = MySQLdb.connect('sql.mit.edu', 'skishore', password, 'skishore+ntris')
+cursor = conn.cursor()
+
+handlers = {}
+def handler(f):
+  handlers[f.__name__[3:]] = f
 
 class ntrisSession(LineReceiver):
   delimiter = '\0'
@@ -24,6 +33,7 @@ class ntrisSession(LineReceiver):
     self.addr = addr
     self.sid = None
     self.rooms = {}
+    self.logged_in = False
 
   def to_dict(self):
     return dict(
@@ -46,12 +56,14 @@ class ntrisSession(LineReceiver):
         del self.server.sessions[self.sid]
 
   def lineReceived(self, line):
-    if line == POLICY_FILE_REQUEST:
-      self.sendLine(POLICY_FILE)
+    if line == policy_file_request:
+      self.sendLine(policy_file)
       return
     (type, data) = json.loads(line)
     if type == 'get_username' and self.sid is None:
       self.create_user(data['sid'], data['name'])
+    elif type in handlers:
+      handlers[type](self, data)
     elif self.sid is not None:
       data.update(self.to_dict())
       self.rooms[data['room']].broadcast(type, data)
@@ -69,6 +81,45 @@ class ntrisSession(LineReceiver):
     self.name = name
     self.server.sessions[self.sid] = self
     self.server.rooms['lobby'].add_user(self)
+
+  @handler
+  def on_login(self, data):
+    (name, password) = (data['name'], data['password'])
+    password_hash = md5.new(password).hexdigest()
+    count = cursor.execute('SELECT password_hash FROM user WHERE name=%s', (name,))
+    if not count:
+      return self.send_message('login_error', 'That username does not exist.')
+    real_hash = cursor.fetchone()[0]
+    if password_hash != real_hash:
+      return self.send_message('login_error', 'Incorrect password.')
+    self.name = name
+    self.logged_in = True
+    self.server.broadcast('change_username', self.to_dict())
+
+  @handler
+  def on_signup(self, data):
+    if self.logged_in:
+      return
+    (name, email, password) = (data['name'], data['email'], data['password'])
+    error = None
+    if len(name) < 4 or len(name) > 32:
+      error = 'Your username must be between 4 and 32 characters.'
+    elif not name.isalnum():
+      error = 'Your username must be alphanumeric.'
+    elif len(password) < 4 or len(password) > 64:
+      error = 'Your password must be between 8 and 64 characters.'
+    else:
+      password_hash = md5.new(password).hexdigest()
+      try:
+        cursor.execute('INSERT INTO user VALUES (%s, %s, %s)',
+            (name, email, password_hash))
+      except MySQLdb.IntegrityError:
+        error = 'That username is already taken.'
+    if error:
+      return self.send_message('signup_error', error)
+    self.name = name
+    self.logged_in = True
+    self.server.broadcast('change_username', self.to_dict())
 
 class ntrisRoom(object):
   def __init__(self, name):
@@ -113,6 +164,6 @@ class ntrisServer(ServerFactory):
       session.sendLine(line)
 
 if __name__ == '__main__':
-  print 'Server running at port %s' % (PORT,)
-  reactor.listenTCP(PORT, ntrisServer())
+  print 'Server running at port %s' % (port,)
+  reactor.listenTCP(port, ntrisServer())
   reactor.run()

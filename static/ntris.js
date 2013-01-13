@@ -24,6 +24,39 @@ var ntris = {
     }
   },
 
+  login: function(name, password) {
+    if (this.connected) {
+      if (!name) {
+        this.ui.set_login_error('Enter your username.');
+      } else if (!password) {
+        this.ui.set_login_error('Enter your password.');
+      } else {
+        var line = JSON.stringify(['login', {
+          name: name,
+          password: password,
+        }])
+        this.socket.sendLine(line);
+      }
+    }
+  },
+
+  signup: function(name, email, password, retype) {
+    if (this.connected) {
+      if (!name || !password) {
+        this.ui.set_signup_error('You must enter a username and password.');
+      } else if (password != retype) {
+        this.ui.set_signup_error('Your password entries do not match.');
+      } else {
+        var line = JSON.stringify(['signup', {
+          name: name,
+          email: email,
+          password: password,
+        }])
+        this.socket.sendLine(line);
+      }
+    }
+  },
+
   create_room: function(name) {
     if (!this.rooms.hasOwnProperty(name)) {
       var room = {
@@ -137,6 +170,29 @@ var ntris = {
     var line = JSON.stringify(['get_username', this.user]);
     this.socket.sendLine(line)
     this.ui.connected();
+  },
+
+  on_login_error: function(error) {
+    this.ui.set_login_error(error);
+  },
+
+  on_signup_error: function(error) {
+    this.ui.set_signup_error(error);
+  },
+
+  on_change_username: function(data) {
+    if (data.sid == this.user.sid) {
+      this.ui.close_dialogs();
+      this.ui.change_username(data.name);
+    }
+
+    var user = this.create_user(data.sid, data.name);
+    if (user.name != data.name) {
+      user.name = data.name;
+      for (var i = 0; i < user.rooms.length; i++) {
+        this.ui.change_username_in_room(user, user.rooms[i]);
+      }
+    }
   },
 
   on_room_update: function(data) {
