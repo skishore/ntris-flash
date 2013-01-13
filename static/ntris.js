@@ -325,13 +325,18 @@ function socket_bridge_onload() {
       ntris.on_connect()
     },
     on_data: function(json) {
-      var result = JSON.parse(json);
-      var handler = 'on_' + result[0];
-      if (ntris.hasOwnProperty(handler)) {
-        ntris[handler](result[1]);
-      } else {
-        console.log('No ' + handler + ' handler:');
-        console.log(result[1]);
+      try {
+        var result = JSON.parse(json);
+        var handler = 'on_' + result[0];
+        if (ntris.hasOwnProperty(handler)) {
+          ntris[handler](result[1]);
+        } else {
+          console.log('No ' + handler + ' handler:');
+          console.log(result[1]);
+        }
+      } catch (err) {
+        console.debug(err);
+        console.log(err.stack);
       }
     },
     on_close: function() {
