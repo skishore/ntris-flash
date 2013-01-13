@@ -67,6 +67,37 @@ var ntris_ui = {
         e.preventDefault();
       }
     });
+
+    function submit_join_room() {
+      var value = '';
+      var options = $('input[name="join-or-spectate"]');
+      for (var i = 0; i < options.length; i++) {
+        if ($(options[i]).attr('checked')) {
+          value = options[i].id;
+        }
+      }
+      console.debug(value);
+      $('#join-room-dialog').dialog('close');
+    };
+    $('#join-room-dialog').dialog($.extend(attrs, {
+     buttons: {
+        Submit: submit_join_room,
+        Cancel: function() {
+          $('#join-room-dialog').dialog('close');
+        },
+      },
+    }));
+    $('#join-or-spectate').keydown(function(e) {
+      if (e.keyCode == 13) {
+        submit_join_room();
+        e.preventDefault();
+      }
+    });
+  },
+
+  show_join_room_dialog: function(name, size) {
+    console.debug(name, size);
+    this.show_dialog('join-room');
   },
 
   show_dialog: function(dialog) {
@@ -139,7 +170,8 @@ var ntris_ui = {
     if (size) {
       var extra = '(' + size + (name == 'lobby' ? ')' : '/6)');
       var link_html = label + ' ' + extra;
-      var new_li = '<li><a class="' + cls + '" href="#">' + link_html + '</a></li>';
+      var onclick = 'onclick="ntris.ui.show_join_room_dialog(\'' + name + '\', ' + size + ')"'
+      var new_li = '<li><a class="' + cls + '" ' + onclick + '>' + link_html + '</a></li>';
       $('.rooms').each(function() {
         var link = $(this).find('.' + cls);
         if (link.length) {

@@ -149,6 +149,10 @@ button.logged-in {
   overflow-y: auto;
 }
 
+.ui-menu li {
+  cursor: pointer;
+}
+
 .leftalign {
   text-align: left;
 }
