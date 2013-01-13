@@ -99,6 +99,7 @@ var ntris = {
         members: [],
         local_board: null,
         num_remote_boards: 0,
+        remote_boards: {},
       };
       this.rooms[name] = room;
       this.ui.create_room_tab(room, true);
@@ -131,6 +132,7 @@ var ntris = {
         this.ui.create_board(room, user, true);
       } else if (room.num_remote_boards < 6) {
         room.num_remote_boards++;
+        room.remote_boards[user.sid] = board;
         this.ui.create_board(room, user);
       } else {
         // Too many remote boards in this room - cannot create another.
@@ -175,6 +177,7 @@ var ntris = {
         room.local_board = null;
       } else {
         room.num_remote_boards--;
+        delete room.remote_boards[user.sid];
       }
       this.ui.drop_board(board);
       delete this.boards[board.id];
