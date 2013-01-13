@@ -201,7 +201,11 @@ class ntrisSession(LineReceiver):
 
   @handler
   def on_leave_room(self, name):
-    pass
+    if name == 'lobby':
+      return self.send_message('join_room_error', "You can't leave the lobby!")
+    self.send_message('leave_room', name)
+    if name in self.rooms:
+      self.rooms[name].remove_user(self)
 
 # Class that stores data about the users in a given room.
 class ntrisRoom(object):

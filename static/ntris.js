@@ -76,8 +76,8 @@ var ntris = {
 
   submit_join_room: function(name, action) {
     if (this.connected) {
-      if (action != 'join_room') {
-        this.ui.set_dialog_error('join-room', 'Leaving and spectating are not implemented yet.');
+      if (action != 'join_room' && action != 'leave_room') {
+        this.ui.set_dialog_error('join-room', 'Spectating is not implemented yet.');
       } else {
         this.socket.sendLine(JSON.stringify([action, name]));
       }
@@ -105,6 +105,16 @@ var ntris = {
       this.ui.create_room_tab(room, true);
     }
     return this.rooms[name];
+  },
+
+  drop_room: function(name) {
+    if (name != 'lobby' && this.rooms.hasOwnProperty(name)) {
+      var room = this.rooms[name];
+      for (var i = 0; i < room.members.length; i++) {
+        this.remove_user_from_room(room.members[0], room, true);
+      }
+      this.ui.drop_room_tab(room);
+    }
   },
 
   create_user: function(sid, name) {
@@ -151,8 +161,8 @@ var ntris = {
     }
   },
 
-  remove_user_from_room: function(user, room) {
-    if (user === this.user) {
+  remove_user_from_room: function(user, room, drop_room) {
+    if (user === this.user && !drop_room) {
       console.debug('Should never have to remove this user from a room!');
       return;
     }
@@ -244,6 +254,11 @@ var ntris = {
     this.create_room(data.name, data.label);
   },
 
+  on_leave_room: function(name) {
+    this.ui.close_dialogs();
+    this.drop_room(name);
+  },
+
   on_room_update: function(data) {
     if (this.rooms.hasOwnProperty(data.room)) {
       var room = this.rooms[data.room];
@@ -262,6 +277,8 @@ var ntris = {
       for (i = 0; i < users_to_remove.length; i++) {
         this.remove_user_from_room(users_to_remove[i], room);
       }
+    } else if (data.members.indexOf(this.user.sid) != -1) {
+      this.socket.sendLine(JSON.dumps(['leave_room', data.name]));
     }
     this.ui.update_room_sizes(data.room, data.label, data.members.length);
   },
@@ -335,7 +352,7 @@ function socket_bridge_onload() {
           console.log(result[1]);
         }
       } catch (err) {
-        console.debug(err);
+        console.log(err);
         console.log(err.stack);
       }
     },

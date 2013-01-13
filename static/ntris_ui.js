@@ -183,6 +183,16 @@ var ntris_ui = {
     return room_tab.id.substr(0, room_tab.id.length - 5);
   },
 
+  drop_room_tab: function(room) {
+    var return_to_lobby = (this.current_room_name() == room.name);
+    $('#tablist a[href="#' + room.id + '"]').remove();
+    $('#' + room.id).remove();
+    $('#tabs').tabs('refresh');
+    if (return_to_lobby) {
+      $('#tabs').tabs('option', 'active', 0);
+    }
+  },
+
   change_rooms: function(name) {
     if (ntris.rooms.hasOwnProperty(name)) {
       var room = ntris.rooms[name];
