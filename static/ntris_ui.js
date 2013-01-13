@@ -223,6 +223,7 @@ var ntris_ui = {
       $('.' + cls).click(function() {
         ntris.ui.show_join_room_dialog(name, label, size);
       });
+      $('#tablist a[href="#' + name + '-room"]').html(link_html);
     } else {
       $($('.' + cls).parent()).remove();
     }
