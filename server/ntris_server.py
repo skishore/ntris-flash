@@ -163,12 +163,13 @@ class ntrisSession(LineReceiver):
 
   @handler
   def on_create_room(self, label):
-    name = label.lower()
+    label = label.strip()
+    name = label.lower().replace(' ', '')
     error = None
     if len(name) < 4 or len(name) > 32:
       error = 'Room names must be between 4 and 32 characters.'
     elif not name.isalnum():
-      error = 'Room names must be alphanumeric.'
+      error = 'Room names can only contain letters, numbers and spaces.'
     elif name in self.server.rooms:
       error = 'That room name is already taken.'
     if error:

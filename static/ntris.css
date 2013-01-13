@@ -22,6 +22,7 @@ body {
 
 .error {
   color: red;
+  font-size: 12px;
   height: 12px;
   margin-top: -4px;
 }
