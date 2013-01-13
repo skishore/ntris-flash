@@ -28,13 +28,16 @@
         <button class="logged-in" onclick="ntris.logout()">
           Log out
         </button>
-        <button class="logged-out" onclick="ntris.ui.show_signup_dialog()">
+        <button class="logged-out" onclick="ntris.ui.show_dialog('signup')">
           Sign up
         </button>
-        <button class="logged-out" onclick="ntris.ui.show_login_dialog()">
+        <button class="logged-out" onclick="ntris.ui.show_dialog('login')">
           Log in
         </button>
-        <button id="singleplayer" onclick="ntris.play_singleplayer()">
+        <button onclick="ntris.ui.show_dialog('create-room')">
+          Create room
+        </button>
+        <button onclick="ntris.play_singleplayer()">
           Play singleplayer
         </button>
       </ul>
@@ -115,4 +118,16 @@
     </table>
   </fieldset></form>
   <div id="signup-error" class="error"></div>
+<div>
+
+<div id="create-room-dialog" title="Create a new room">
+  <form><fieldset>
+    <table>
+      <tr>
+        <td><label for="create-room-name">Room name:</label></td>
+        <td><input type="text" id="create-room-name"></td>
+      </tr>
+    </table>
+  </fieldset></form>
+  <div id="create-room-error" class="error"></div>
 <div>

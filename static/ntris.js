@@ -13,7 +13,7 @@ var ntris = {
 
   initialize: function() {
     this.ui.initialize();
-    this.create_room('lobby');
+    this.create_room('lobby', 'Lobby');
 
     var sid = randint(0, 1 << 30);
     var name = 'guest' + randint(100000, 999999);
@@ -25,12 +25,12 @@ var ntris = {
     }
   },
 
-  login: function(name, password) {
+  submit_login: function(name, password) {
     if (this.connected) {
       if (!name) {
-        this.ui.set_login_error('Enter your username.');
+        this.ui.set_dialog_error('login', 'Enter your username.');
       } else if (!password) {
-        this.ui.set_login_error('Enter your password.');
+        this.ui.set_dialog_error('login', 'Enter your password.');
       } else {
         var line = JSON.stringify(['login', {
           name: name,
@@ -38,15 +38,17 @@ var ntris = {
         }])
         this.socket.sendLine(line);
       }
+    } else {
+      this.ui.set_dialog_error('login', 'Not connected to the server.');
     }
   },
 
-  signup: function(name, email, password, retype) {
+  submit_signup: function(name, email, password, retype) {
     if (this.connected) {
       if (!name || !password) {
-        this.ui.set_signup_error('You must enter a username and password.');
+        this.ui.set_dialog_error('signup', 'You must enter a username and password.');
       } else if (password != retype) {
-        this.ui.set_signup_error('Your password entries do not match.');
+        this.ui.set_dialog_error('signup', 'Your password entries do not match.');
       } else {
         var line = JSON.stringify(['signup', {
           name: name,
@@ -55,6 +57,23 @@ var ntris = {
         }])
         this.socket.sendLine(line);
       }
+    } else {
+      this.ui.set_dialog_error('signup', 'Not connected to the server.');
+    }
+  },
+
+  submit_create_room: function(label) {
+    if (this.connected) {
+      if (!label) {
+        this.ui.set_dialog_error('create-room', 'Enter a name for your room.');
+      } else {
+        var line = JSON.stringify(['create_room', {
+          label: label,
+        }]);
+        this.socket.sendLine(line);
+      }
+    } else {
+      this.ui.set_dialog_error('create-room', 'Not connected to the server.');
     }
   },
 
@@ -64,18 +83,18 @@ var ntris = {
     }]));
   },
 
-  create_room: function(name) {
+  create_room: function(name, label) {
     if (!this.rooms.hasOwnProperty(name)) {
       var room = {
         name: name,
         id: name + '-room',
+        label: label,
         members: [],
         local_board: null,
         num_remote_boards: 0,
       };
       this.rooms[name] = room;
-      var set_active = name == 'lobby';
-      this.ui.create_room_tab(room, set_active);
+      this.ui.create_room_tab(room, true);
     }
     return this.rooms[name];
   },
@@ -180,11 +199,15 @@ var ntris = {
   },
 
   on_login_error: function(error) {
-    this.ui.set_login_error(error);
+    this.ui.set_dialog_error('login', error);
   },
 
   on_signup_error: function(error) {
-    this.ui.set_signup_error(error);
+    this.ui.set_dialog_error('signup', error);
+  },
+
+  on_create_room_error: function(error) {
+    this.ui.set_dialog_error('create-room', error);
   },
 
   on_change_username: function(data) {
@@ -200,6 +223,11 @@ var ntris = {
         this.ui.change_username_in_room(user, user.rooms[i]);
       }
     }
+  },
+
+  on_join_room: function(data) {
+    this.ui.close_dialogs();
+    this.create_room(data.name, data.label);
   },
 
   on_room_update: function(data) {
@@ -221,6 +249,7 @@ var ntris = {
         this.remove_user_from_room(users_to_remove[i], room);
       }
     }
+    this.ui.update_room_sizes(data.room, data.label, data.members.length);
   },
 
   on_board_update: function(data) {

@@ -110,6 +110,9 @@ class ntrisSession(LineReceiver):
     self.name = name
     self.server.sessions[self.sid] = self
     self.server.rooms['lobby'].add_user(self)
+    for room in self.server.rooms.itervalues():
+      if room.name != 'lobby':
+        self.send_message('room_update', room.to_dict())
 
   @handler
   def on_login(self, data):
@@ -158,15 +161,38 @@ class ntrisSession(LineReceiver):
     self.logged_in = False
     self.server.broadcast('change_username', self.to_dict())
 
+  @handler
+  def on_create_room(self, data):
+    label = data['label']
+    name = label.lower()
+    error = None
+    if len(name) < 4 or len(name) > 32:
+      error = 'Room names must be between 4 and 32 characters.'
+    elif not name.isalnum():
+      error = 'Room names must be alphanumeric.'
+    elif name in self.server.rooms:
+      error = 'That room name is already taken.'
+    if error:
+      return self.send_message('create_room_error', error)
+    self.send_message('join_room', dict(
+        name=name,
+        label=label,
+      ))
+    self.server.rooms[name] = ntrisRoom(self.server, name, label)
+    self.server.rooms[name].add_user(self)
+
 # Class that stores data about the users in a given room.
 class ntrisRoom(object):
-  def __init__(self, name):
+  def __init__(self, server, name, label):
+    self.server = server
     self.name = name
+    self.label = label
     self.members = {}
 
   def to_dict(self):
     return dict(
         room=self.name,
+        label=self.label,
         members=[session.to_dict() for session in self.members.itervalues()],
       )
 
@@ -174,14 +200,16 @@ class ntrisRoom(object):
     if session.sid not in self.members:
       self.members[session.sid] = session
       session.rooms[self.name] = self
-      self.broadcast('room_update', self.to_dict())
+      self.server.broadcast('room_update', self.to_dict())
 
   def remove_user(self, session):
     if session.sid in self.members:
       del self.members[session.sid]
       if self.name in session.rooms:
         del session.rooms[self.name]
-      self.broadcast('room_update', self.to_dict())
+      self.server.broadcast('room_update', self.to_dict())
+      if not len(self.members):
+        del self.server.rooms[self.name]
 
   def broadcast(self, type, data):
     line = json.dumps([type, data])
@@ -192,7 +220,7 @@ class ntrisRoom(object):
 class ntrisServer(ServerFactory):
   def __init__(self):
     self.sessions = {}
-    self.rooms = {'lobby': ntrisRoom('lobby')}
+    self.rooms = {'lobby': ntrisRoom(self, 'lobby', 'Lobby')}
 
   def buildProtocol(self, addr):
     return ntrisSession(self, addr)

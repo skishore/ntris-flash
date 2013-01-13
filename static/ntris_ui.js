@@ -14,7 +14,7 @@ var ntris_ui = {
     };
 
     function submit_login() {
-      ntris.login($('#login-username').val(), $('#login-password').val());
+      ntris.submit_login($('#login-username').val(), $('#login-password').val());
     };
     $('#login-dialog').dialog($.extend(attrs, {
      buttons: {
@@ -25,12 +25,15 @@ var ntris_ui = {
       },
     }));
     $('#login-password').keydown(function(e) {
-      if (e.keyCode == 13) submit_login();
+      if (e.keyCode == 13) {
+        submit_login();
+        e.preventDefault();
+      }
     });
 
     function submit_signup() {
-      ntris.signup($('#signup-username').val(), $('#signup-email').val(),
-                   $('#signup-password').val(), $('#retype-password').val());
+      ntris.submit_signup($('#signup-username').val(), $('#signup-email').val(),
+                          $('#signup-password').val(), $('#retype-password').val());
     };
     $('#signup-dialog').dialog($.extend(attrs, {
      buttons: {
@@ -41,33 +44,43 @@ var ntris_ui = {
       },
     }));
     $('#retype-password').keydown(function(e) {
-      if (e.keyCode == 13) submit_signup();
+      if (e.keyCode == 13) {
+        submit_signup();
+        e.preventDefault();
+      }
+    });
+
+    function submit_create_room() {
+      ntris.submit_create_room($('#create-room-name').val());
+    };
+    $('#create-room-dialog').dialog($.extend(attrs, {
+     buttons: {
+        Submit: submit_create_room,
+        Cancel: function() {
+          $('#create-room-dialog').dialog('close');
+        },
+      },
+    }));
+    $('#create-room-name').keydown(function(e) {
+      if (e.keyCode == 13) {
+        submit_create_room();
+        e.preventDefault();
+      }
     });
   },
 
-  show_login_dialog: function() {
-    this.set_login_error('');
-    $('#login-dialog').find('input').val('');
-    $('#login-dialog').dialog('open');
+  show_dialog: function(dialog) {
+    this.set_dialog_error(dialog, '');
+    $('#' + dialog + '-dialog').find('input').val('');
+    $('#' + dialog + '-dialog').dialog('open');
   },
 
-  show_signup_dialog: function() {
-    this.set_signup_error('');
-    $('#signup-dialog').find('input').val('');
-    $('#signup-dialog').dialog('open');
-  },
-
-  set_login_error: function(error) {
-    $('#login-dialog').find('.error').html(error);
-  },
-
-  set_signup_error: function(error) {
-    $('#signup-dialog').find('.error').html(error);
+  set_dialog_error: function(dialog, error) {
+    $('#' + dialog + '-dialog').find('.error').html(error);
   },
 
   close_dialogs: function() {
-    $('#login-dialog').dialog('close');
-    $('#signup-dialog').dialog('close');
+    $('.ui-dialog-content').dialog('close');
   },
 
   connected: function() {
@@ -87,19 +100,17 @@ var ntris_ui = {
   },
 
   create_room_tab: function(room, set_active) {
-    var label = room.name[0].toUpperCase() + room.name.slice(1);
     roomHTML = '<div class="room-tab" id="' + room.id + '">' + this._room_prototype;
-    $('#tablist').append('<li><a href="#' + room.id + '">' + label + '</a></li>');
+    $('#tablist').append('<li><a href="#' + room.id + '">' + room.label + '</a></li>');
     $('#tabs').append(roomHTML);
 
     $('#' + room.id).find('.users').menu();
-    $('#' + room.id).find('.rooms').menu();
-    $('#tabs').tabs('refresh');
-
-    if (set_active) {
-      var num_tabs = $('#tabs').find('.room-tab').length;
-      $('#tabs').tabs('option', 'active', num_tabs - 1);
+    var rooms_list = $('#' + room.id).find('.rooms');
+    var room_links = $('#lobby-room').find('.rooms').find('li');
+    for (var i = 0; i < room_links.length; i++) {
+      rooms_list.append('<li>' + $(room_links[i]).html() + '</li>');
     }
+    rooms_list.menu();
 
     $('#' + room.id).find('.chat').keydown(function(e) {
       if (e.keyCode == 13) {
@@ -110,11 +121,37 @@ var ntris_ui = {
         }
       }
     });
+
+    $('#tabs').tabs('refresh');
+    if (set_active) {
+      var num_tabs = $('#tabs').find('.room-tab').length;
+      $('#tabs').tabs('option', 'active', num_tabs - 1);
+    }
   },
 
   current_room_name: function() {
     var room_tab = $('.room-tab')[$('#tabs').tabs('option', 'active')];
     return room_tab.id.substr(0, room_tab.id.length - 5);
+  },
+
+  update_room_sizes: function(name, label, size) {
+    var cls = name + '-size';
+    if (size) {
+      var extra = '(' + size + (name == 'lobby' ? ')' : '/6)');
+      var link_html = label + ' ' + extra;
+      var new_li = '<li><a class="' + cls + '" href="#">' + link_html + '</a></li>';
+      $('.rooms').each(function() {
+        var link = $(this).find('.' + cls);
+        if (link.length) {
+          link.html(link_html);
+        } else {
+          $(this).append(new_li);
+          $(this).menu('refresh');
+        }
+      });
+    } else {
+      $('.' + cls).remove();
+    }
   },
 
   add_user_to_room: function(user, room) {
