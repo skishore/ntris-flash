@@ -77,7 +77,7 @@ var ntris = {
   submit_join_room: function(name, action) {
     if (this.connected) {
       if (action != 'join_room' && action != 'leave_room') {
-        this.ui.set_dialog_error('join-room', 'Spectating is not implemented yet.');
+        this.ui.set_dialog_error('join-room', 'Spectating has not been implemented yet.');
       } else {
         this.socket.sendLine(JSON.stringify([action, name]));
       }

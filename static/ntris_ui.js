@@ -87,7 +87,7 @@ var ntris_ui = {
         };
       if (name != 'lobby') {
         buttons.Leave = function() {
-            ntris.submit_join_room($('#join-room-name').val(), 'leave_room');
+            ntris.submit_join_room(name, 'leave_room');
           };
       }
     } else {
@@ -99,20 +99,32 @@ var ntris_ui = {
       } else {
         $('#room-membership').html('You can join this room or spectate from the lobby.');
         buttons.Join = function() {
-            ntris.submit_join_room($('#join-room-name').val(), 'join_room');
+            ntris.submit_join_room(name, 'join_room');
           };
       }
       buttons.Spectate = function() {
-          ntris.submit_join_room($('#join-room-name').val(), 'spectate_on_room');
+          ntris.submit_join_room(name, 'spectate_on_room');
         };
     }
     buttons.Cancel = function() {
         $('#join-room-dialog').dialog('close');
       };
     $('#join-room-dialog').dialog('option', 'buttons', buttons);
-
     this.show_dialog('join-room');
-    $('#join-room-name').val(name);
+  },
+
+  show_leave_room_dialog: function(name, label) {
+    $('#room-details').html('Are you sure you want to leave ' + label + '?');
+    $('#room-membership').html('You will lose any games you are playing in this room.');
+    $('#join-room-dialog').dialog('option', 'buttons', {
+        Leave: function() {
+          ntris.submit_join_room(name, 'leave_room');
+        },
+        Cancel: function() {
+          $('#join-room-dialog').dialog('close');
+        },
+      });
+    this.show_dialog('join-room');
   },
 
   show_dialog: function(dialog) {
@@ -146,9 +158,21 @@ var ntris_ui = {
   },
 
   create_room_tab: function(room) {
-    roomHTML = '<div class="room-tab" id="' + room.id + '">' + this._room_prototype;
-    $('#tablist').append('<li><a href="#' + room.id + '">' + room.label + '</a></li>');
-    $('#tabs').append(roomHTML);
+    var lobby = (room.name == 'lobby');
+
+    room_html = '<div class="room-tab" id="' + room.id + '">' + this._room_prototype;
+    li_html = '<li><a href="#' + room.id + '">' + room.label + '</a>';
+    if (!lobby) {
+      li_html += '<span id="leave-' + room.id + '" class="leave-icon ui-icon ui-icon-close"/>';
+    }
+    li_html += '</li>';
+    $('#tablist').append(li_html);
+    $('#tabs').append(room_html);
+    if (!lobby) {
+      $('#leave-' + room.id).click(function() {
+        ntris.ui.show_leave_room_dialog(room.name, room.label);
+      });
+    }
 
     $('#' + room.id).find('.users').menu();
     // TODO: Links copied from the lobby do not have an onlick.

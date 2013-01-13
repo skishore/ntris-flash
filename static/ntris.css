@@ -72,6 +72,15 @@ button.logged-in {
   float: right;
 }
 
+#tablist a {
+  cursor: pointer;
+}
+
+.leave-icon {
+  margin: 3px 3px 3px -3px;
+  cursor: pointer;
+}
+
 .room-tab {
   height: 541px;
 }
@@ -212,6 +221,10 @@ button.logged-in {
   display: none;
 }
 
-#room-details {
-  padding-bottom: 10px;
+#room-details, #room-membership {
+  margin-bottom: 6px;
+}
+
+#join-room-error {
+  margin-top: 0px;
 }
