@@ -185,7 +185,7 @@ var ntris_ui = {
 
   drop_room_tab: function(room) {
     var return_to_lobby = (this.current_room_name() == room.name);
-    $('#tablist a[href="#' + room.id + '"]').remove();
+    $($('#tablist a[href="#' + room.id + '"]').parent()).remove();
     $('#' + room.id).remove();
     $('#tabs').tabs('refresh');
     if (return_to_lobby) {

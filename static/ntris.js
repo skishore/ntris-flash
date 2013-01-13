@@ -114,6 +114,7 @@ var ntris = {
         this.remove_user_from_room(room.members[0], room, true);
       }
       this.ui.drop_room_tab(room);
+      delete this.rooms[name];
     }
   },
 
