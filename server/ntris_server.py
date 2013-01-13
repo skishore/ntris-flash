@@ -208,7 +208,7 @@ class ntrisRoom(object):
       if self.name in session.rooms:
         del session.rooms[self.name]
       self.server.broadcast('room_update', self.to_dict())
-      if not len(self.members):
+      if self.name != 'lobby' and not len(self.members):
         del self.server.rooms[self.name]
 
   def broadcast(self, type, data):
