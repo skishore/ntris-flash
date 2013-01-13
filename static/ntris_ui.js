@@ -126,6 +126,16 @@ var ntris_ui = {
 
   change_username_in_room: function(user, room) {
     $('#' + room.id).find('.' + user.cls).html(user.name);
+    var local = (user === ntris.user);
+    var board = null;
+    if (local && room.local_board) {
+      board = room.local_board;
+    } else if (!local && room.remote_boards.hasOwnProperty(user.sid)) {
+      board = room.remote_boards[user.sid];
+    }
+    if (board) {
+      $('#' + board.id).siblings('.header').html(user.name);
+    }
   },
 
   remove_user_from_room: function(user, room) {
