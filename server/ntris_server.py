@@ -2,6 +2,7 @@ import json
 import md5
 import MySQLdb
 from random import randint
+import time
 
 from twisted.internet import reactor
 from twisted.internet.protocol import (
@@ -10,6 +11,8 @@ from twisted.internet.protocol import (
 from twisted.protocols.basic import LineReceiver
 
 port = 2045
+
+# Flash socket policy files.
 policy_file_request = '<policy-file-request/>'
 policy_file = '''
 <cross-domain-policy>
@@ -17,14 +20,39 @@ policy_file = '''
 </cross-domain-policy>
 ''' % (port,)
 
-password = open('../passwords/skishore@sql.mit.edu:skishore+ntris').read().strip()
-conn = MySQLdb.connect('sql.mit.edu', 'skishore', password, 'skishore+ntris')
-cursor = conn.cursor()
+# Cursor open on the MySQL instance. Tolerates up to one OperaionalError
+# per execute call, because our connection might be timed out by the server.
+class CursorWithRetry(object):
+  def __init__(self):
+    self.password = open('../passwords/skishore@sql.mit.edu:skishore+ntris').read().strip()
+    self.cursor = self.new_cursor()
 
+  def new_cursor(self):
+    conn = MySQLdb.connect('sql.mit.edu', 'skishore', self.password, 'skishore+ntris')
+    self.cursor = conn.cursor()
+    return self.cursor
+
+  def execute(self, sql, params=None):
+    params = params or tuple()
+    try:
+      return self.cursor.execute(sql, params)
+    except MySQLdb.OperationalError:
+      cursor = self.new_cursor()
+      return self.cursor.execute(sql, params)
+
+  def fetchone(self):
+    return self.cursor.fetchone()
+
+  def fetchall(self):
+    return self.cursor.fetchall()
+cursor = CursorWithRetry()
+
+# Decorator used to mark event handlers in ntrisSession.
 handlers = {}
 def handler(f):
   handlers[f.__name__[3:]] = f
 
+# Class that holds a single session open for a client socket.
 class ntrisSession(LineReceiver):
   delimiter = '\0'
 
@@ -130,6 +158,7 @@ class ntrisSession(LineReceiver):
     self.logged_in = False
     self.server.broadcast('change_username', self.to_dict())
 
+# Class that stores data about the users in a given room.
 class ntrisRoom(object):
   def __init__(self, name):
     self.name = name
@@ -159,6 +188,7 @@ class ntrisRoom(object):
     for session in self.members.itervalues():
       session.sendLine(line)
 
+# The server itself, which tracks a list of sessions and rooms.
 class ntrisServer(ServerFactory):
   def __init__(self):
     self.sessions = {}
