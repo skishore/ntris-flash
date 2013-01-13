@@ -67,20 +67,27 @@ var ntris = {
       if (!label) {
         this.ui.set_dialog_error('create-room', 'Enter a name for your room.');
       } else {
-        var line = JSON.stringify(['create_room', {
-          label: label,
-        }]);
-        this.socket.sendLine(line);
+        this.socket.sendLine(JSON.stringify(['create_room', label]));
       }
     } else {
       this.ui.set_dialog_error('create-room', 'Not connected to the server.');
     }
   },
 
+  submit_join_room: function(name, action) {
+    if (this.connected) {
+      if (action != 'join_room') {
+        this.ui.set_dialog_error('join-room', 'Leaving and spectating are not implemented yet.');
+      } else {
+        this.socket.sendLine(JSON.stringify([action, name]));
+      }
+    } else {
+      this.ui.set_dialog_error('join-room', 'Not connected to the server.');
+    }
+  },
+
   logout: function() {
-    this.socket.sendLine(JSON.stringify(['logout', {
-      name: this.user.original_name
-    }]));
+    this.socket.sendLine(JSON.stringify(['logout', this.user.original_name]));
   },
 
   create_room: function(name, label) {
@@ -208,6 +215,10 @@ var ntris = {
 
   on_create_room_error: function(error) {
     this.ui.set_dialog_error('create-room', error);
+  },
+
+  on_join_room_error: function(error) {
+    this.ui.set_dialog_error('join-room', error);
   },
 
   on_change_username: function(data) {

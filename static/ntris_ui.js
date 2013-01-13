@@ -68,36 +68,51 @@ var ntris_ui = {
       }
     });
 
-    function submit_join_room() {
-      var value = '';
-      var options = $('input[name="join-or-spectate"]');
-      for (var i = 0; i < options.length; i++) {
-        if ($(options[i]).attr('checked')) {
-          value = options[i].id;
-        }
-      }
-      console.debug(value);
-      $('#join-room-dialog').dialog('close');
-    };
-    $('#join-room-dialog').dialog($.extend(attrs, {
-     buttons: {
-        Submit: submit_join_room,
-        Cancel: function() {
-          $('#join-room-dialog').dialog('close');
-        },
-      },
-    }));
-    $('#join-or-spectate').keydown(function(e) {
-      if (e.keyCode == 13) {
-        submit_join_room();
-        e.preventDefault();
-      }
-    });
+    $('#join-room-dialog').dialog($.extend(attrs, {}));
   },
 
-  show_join_room_dialog: function(name, size) {
-    console.debug(name, size);
+  show_join_room_dialog: function(data) {
+    if (data.size == 1) {
+      $('#room-details').html('There is 1 user in ' + data.label + '.');
+    } else {
+      $('#room-details').html('There are ' + data.size + ' users in ' + data.label + '.');
+    }
+
+    var buttons = {};
+    if (ntris.rooms.hasOwnProperty(data.name)) {
+      $('#room-membership').html('You are a member of this room.');
+      buttons['Go to'] = function() {
+          ntris.ui.change_rooms(data.name);
+          $('#join-room-dialog').dialog('close');
+        };
+      if (data.name != 'lobby') {
+        buttons.Leave = function() {
+            ntris.submit_join_room($('#join-room-name').val(), 'leave_room');
+          };
+      }
+    } else {
+      if (data.in_game) {
+        $('#room-membership').html('The players in this room are in a multiplayer game. ' +
+                                   'You can spectate from the lobby.');
+      } else if (data.size >= 6) {
+        $('#room-membership').html('This room is full, but you can spectate from the lobby.');
+      } else {
+        $('#room-membership').html('You can join this room or spectate from the lobby.');
+        buttons.Join = function() {
+            ntris.submit_join_room($('#join-room-name').val(), 'join_room');
+          };
+      }
+      buttons.Spectate = function() {
+          ntris.submit_join_room($('#join-room-name').val(), 'spectate_on_room');
+        };
+    }
+    buttons.Cancel = function() {
+        $('#join-room-dialog').dialog('close');
+      };
+    $('#join-room-dialog').dialog('option', 'buttons', buttons);
+
     this.show_dialog('join-room');
+    $('#join-room-name').val(data.name);
   },
 
   show_dialog: function(dialog) {
@@ -165,12 +180,30 @@ var ntris_ui = {
     return room_tab.id.substr(0, room_tab.id.length - 5);
   },
 
+  change_rooms: function(name) {
+    if (ntris.rooms.hasOwnProperty(name)) {
+      var room = ntris.rooms[name];
+      var room_tabs = $('.room-tab');
+      for (var i = 0; i < room_tabs.length; i++) {
+        if (room_tabs[i].id == room.id) {
+          $('#tabs').tabs('option', 'active', i);
+          return;
+        }
+      }
+    }
+  },
+
   update_room_sizes: function(name, label, size) {
     var cls = name + '-size';
     if (size) {
-      var extra = '(' + size + (name == 'lobby' ? ')' : '/6)');
-      var link_html = label + ' ' + extra;
-      var onclick = 'onclick="ntris.ui.show_join_room_dialog(\'' + name + '\', ' + size + ')"'
+      var data = {
+        name: name,
+        label: label,
+        size: size,
+      };
+      var onclick = "onclick='ntris.ui.show_join_room_dialog(" + JSON.stringify(data) + ")'";
+
+      var link_html = label + ' (' + size + (name == 'lobby' ? ')' : '/6)');
       var new_li = '<li><a class="' + cls + '" ' + onclick + '>' + link_html + '</a></li>';
       $('.rooms').each(function() {
         var link = $(this).find('.' + cls);
@@ -254,6 +287,7 @@ var ntris_ui = {
   },
 
   disconnected: function() {
+    this.close_dialogs();
     $('#topbar').removeClass('connecting connected');
     $('#topbar').html('Status: disconnected.');
   },

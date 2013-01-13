@@ -4,6 +4,10 @@ body {
   width: 98%;
 }
 
+.hidden {
+  display: none;
+}
+
 .ui-dialog fieldset {
   background: #EEE;
 }
@@ -206,4 +210,8 @@ button.logged-in {
 
 #room-prototype {
   display: none;
+}
+
+#room-details {
+  padding-bottom: 10px;
 }

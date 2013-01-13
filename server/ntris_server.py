@@ -154,16 +154,15 @@ class ntrisSession(LineReceiver):
     self.server.broadcast('change_username', self.to_dict())
 
   @handler
-  def on_logout(self, data):
+  def on_logout(self, name):
     if not self.logged_in:
       return
-    self.name = data['name']
+    self.name = name
     self.logged_in = False
     self.server.broadcast('change_username', self.to_dict())
 
   @handler
-  def on_create_room(self, data):
-    label = data['label']
+  def on_create_room(self, label):
     name = label.lower()
     error = None
     if len(name) < 4 or len(name) > 32:
@@ -180,6 +179,29 @@ class ntrisSession(LineReceiver):
       ))
     self.server.rooms[name] = ntrisRoom(self.server, name, label)
     self.server.rooms[name].add_user(self)
+
+  @handler
+  def on_join_room(self, name):
+    if name in self.rooms:
+      return self.send_message('join_room_error', 'You are already a member of that room.')
+    elif name not in self.server.rooms:
+      return self.send_message('join_room_error', 'That room no longer exists.')
+    room = self.server.rooms[name]
+    if len(room.members) >= 6:
+      return self.send_message('join_room_error', 'That room is now full.')
+    self.send_message('join_room', dict(
+        name=room.name,
+        label=room.label,
+      ))
+    room.add_user(self)
+
+  @handler
+  def on_spectate_on_room(self, name):
+    pass
+
+  @handler
+  def on_leave_room(self, name):
+    pass
 
 # Class that stores data about the users in a given room.
 class ntrisRoom(object):

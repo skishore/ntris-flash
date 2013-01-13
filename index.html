@@ -132,19 +132,10 @@
   <div id="create-room-error" class="error"></div>
 </div>
 
-<div id="join-room-dialog" title="Join room">
-  <form><fieldset>
-    <table>
-      <tr>
-        <td><input type="radio" id="option-join" name="join-or-spectate"></td>
-        <td><span>Join this room.</span></td>
-      </tr>
-      <tr>
-        <td><input type="radio" id="option-spectate" name="join-or-spectate"></td>
-        <td><span>Spectate from the lobby.</span></td>
-      </tr>
-      <tr>
-    </table>
-  </fieldset></form>
+<div id="join-room-dialog" title="Room details">
+  <div id="room-details">The room "Lobby" currently has 1 member.</div>
+  <div id="room-membership">You are a member of this room.</div>
+  <br>
   <div id="join-room-error" class="error"></div>
+  <input type="text" class="hidden" id="join-room-name">
 </div>
