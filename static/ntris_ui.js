@@ -76,11 +76,13 @@ var ntris_ui = {
     $('#topbar').html('Status: in guest mode as ' + ntris.user.name);
   },
 
-  change_username: function(name, in_guest_mode) {
-    if (in_guest_mode) {
-      $('#topbar').html('Status: in guest mode as ' + name);
-    } else {
+  change_username: function(name, logged_in) {
+    if (logged_in) {
+      $('#tabs').addClass('logged-in');
       $('#topbar').html('Status: logged in as ' + name);
+    } else {
+      $('#tabs').removeClass('logged-in');
+      $('#topbar').html('Status: in guest mode as ' + name);
     }
   },
 

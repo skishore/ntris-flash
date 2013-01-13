@@ -25,10 +25,13 @@
         <button id="highscores">View high scores</button>
         <button id="createroom">Create room</button>
         -->
-        <button class="guest-only" onclick="ntris.ui.show_signup_dialog()">
+        <button class="logged-in" onclick="ntris.logout()">
+          Log out
+        </button>
+        <button class="logged-out" onclick="ntris.ui.show_signup_dialog()">
           Sign up
         </button>
-        <button class="guest-only" onclick="ntris.ui.show_login_dialog()">
+        <button class="logged-out" onclick="ntris.ui.show_login_dialog()">
           Log in
         </button>
         <button id="singleplayer" onclick="ntris.play_singleplayer()">

@@ -47,6 +47,18 @@ body {
   border: 1px solid #686;
 }
 
+button.logged-in {
+  display: none;
+}
+
+#tabs.logged-in button.logged-in {
+  display: block;
+}
+
+#tabs.logged-in button.logged-out {
+  display: none;
+}
+
 #tabs {
   margin-top: 16px;
   width: 1160px;

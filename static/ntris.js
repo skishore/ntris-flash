@@ -18,6 +18,7 @@ var ntris = {
     var sid = randint(0, 1 << 30);
     var name = 'guest' + randint(100000, 999999);
     this.user = this.create_user(sid, name);
+    this.user.original_name = this.user.name;
 
     if (window.hasOwnProperty('after_initialize')) {
       window.after_initialize();
@@ -55,6 +56,12 @@ var ntris = {
         this.socket.sendLine(line);
       }
     }
+  },
+
+  logout: function() {
+    this.socket.sendLine(JSON.stringify(['logout', {
+      name: this.user.original_name
+    }]));
   },
 
   create_room: function(name) {
@@ -183,7 +190,7 @@ var ntris = {
   on_change_username: function(data) {
     if (data.sid == this.user.sid) {
       this.ui.close_dialogs();
-      this.ui.change_username(data.name);
+      this.ui.change_username(data.name, data.logged_in);
     }
 
     var user = this.create_user(data.sid, data.name);

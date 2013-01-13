@@ -39,6 +39,7 @@ class ntrisSession(LineReceiver):
     return dict(
         sid=self.sid,
         name=self.name,
+        logged_in=self.logged_in,
       )
 
   def connectionMade(self):
@@ -119,6 +120,14 @@ class ntrisSession(LineReceiver):
       return self.send_message('signup_error', error)
     self.name = name
     self.logged_in = True
+    self.server.broadcast('change_username', self.to_dict())
+
+  @handler
+  def on_logout(self, data):
+    if not self.logged_in:
+      return
+    self.name = data['name']
+    self.logged_in = False
     self.server.broadcast('change_username', self.to_dict())
 
 class ntrisRoom(object):
