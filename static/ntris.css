@@ -218,7 +218,7 @@ button.logged-in {
   height: 208px;
 }
 
-#room-prototype {
+#room-prototype, #multiplayer-prototype {
   display: none;
 }
 
@@ -228,4 +228,46 @@ button.logged-in {
 
 #join-room-error {
   margin-top: 0px;
+}
+
+.multiplayer {
+  border: solid #BBB;
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  border-width: 0px 1px 1px;
+  height: 224px;
+}
+
+.multiplayer-rules {
+  margin: 0px 8px;
+  padding: 8px 0px;
+  font-size: 12px;
+}
+
+.multiplayer button {
+  color: white;
+  font-size: 13px!important;
+  border-radius: 4px;
+  border-width: 1px;
+}
+
+.create-game {
+  background-color: #48F;
+  padding: 20px 4px;
+  width: 90%;
+  margin: 0% 5%;
+}
+
+.accept-game, .reject-game {
+  padding: 4px;
+  width: 42%;
+  margin: 0% -3% 0% 5%;
+}
+
+.accept-game {
+  background-color: #4B4;
+}
+
+.reject-game {
+  background-color: #D44;
 }

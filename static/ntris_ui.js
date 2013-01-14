@@ -1,8 +1,11 @@
 var ntris_ui = {
   initialize: function() {
-    this._room_prototype = $('#room-prototype').html() + '</div>';
+    this._room_prototype = $('#room-prototype').html();
+    this._multiplayer_prototype = $('#multiplayer-prototype').html();
+    $('.prototype').remove();
+
     $('#tabs').tabs();
-    $('button').button().click(function(event) {
+    $('#tabs button').button().click(function(event) {
       event.preventDefault();
     });
 
@@ -160,7 +163,7 @@ var ntris_ui = {
   create_room_tab: function(room) {
     var lobby = (room.name == 'lobby');
 
-    room_html = '<div class="room-tab" id="' + room.id + '">' + this._room_prototype;
+    room_html = '<div class="room-tab" id="' + room.id + '">' + this._room_prototype + '</div>';
     li_html = '<li><a href="#' + room.id + '">' + room.label + '</a>';
     if (!lobby) {
       li_html += '<span id="leave-' + room.id + '" class="leave-icon ui-icon ui-icon-close"/>';
@@ -175,15 +178,14 @@ var ntris_ui = {
     }
 
     $('#' + room.id).find('.users').menu();
-    // TODO: Links copied from the lobby do not have an onlick.
-    // This is okay because the rooms div will be replaced by a game div
-    // in other rooms, but they're broken for now.
-    var rooms_list = $('#' + room.id).find('.rooms');
-    var room_links = $('#lobby-room').find('.rooms').find('li');
-    for (var i = 0; i < room_links.length; i++) {
-      rooms_list.append('<li>' + $(room_links[i]).html() + '</li>');
+    if (lobby && false) {
+      $('#' + room.id).find('.rooms').menu();
+    } else {
+      var multiplayer = $('#' + room.id).find('.rooms').parent();
+      multiplayer.find('.header').html('Multiplayer:');
+      multiplayer.find('.rooms').remove();
+      multiplayer.append(this._multiplayer_prototype);
     }
-    rooms_list.menu();
 
     $('#' + room.id).find('.chat').keydown(function(e) {
       if (e.keyCode == 13) {
@@ -233,7 +235,7 @@ var ntris_ui = {
     if (size) {
       var link_html = label + ' (' + size + (name == 'lobby' ? ')' : '/6)');
       var new_li = '<li><a class="' + cls + '">' + link_html + '</a></li>';
-      $('.room-tab .rooms').each(function() {
+      $('#lobby-room .rooms').each(function() {
         var link = $(this).find('.' + cls);
         if (link.length) {
           link.html(link_html);
