@@ -79,6 +79,8 @@ var ntris = {
     if (this.connected) {
       if (action != 'join_room' && action != 'leave_room') {
         this.ui.set_dialog_error('join-room', 'Spectating has not been implemented yet.');
+      } else if (action == 'join_room' && this.user.rooms.length >= 6) {
+        this.ui.set_dialog_error('join-room', 'You cannot join more than 6 rooms.');
       } else {
         this.socket.sendLine(JSON.stringify([action, name]));
       }

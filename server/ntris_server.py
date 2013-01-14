@@ -24,11 +24,11 @@ policy_file = '''
 # per execute call, because our connection might be timed out by the server.
 class CursorWithRetry(object):
   def __init__(self):
-    self.password = open('../passwords/skishore@sql.mit.edu:skishore+ntris').read().strip()
+    self.password = open('../passwords/ntris@ideafutures').read().strip()
     self.cursor = self.new_cursor()
 
   def new_cursor(self):
-    conn = MySQLdb.connect('sql.mit.edu', 'skishore', self.password, 'skishore+ntris')
+    conn = MySQLdb.connect('198.101.212.47', 'ntris', self.password, 'ntris', connect_timeout=10)
     self.cursor = conn.cursor()
     return self.cursor
 
@@ -39,6 +39,9 @@ class CursorWithRetry(object):
     except MySQLdb.OperationalError:
       cursor = self.new_cursor()
       return self.cursor.execute(sql, params)
+
+  def commit(self):
+    self.cursor.execute('commit')
 
   def fetchone(self):
     return self.cursor.fetchone()
@@ -145,6 +148,7 @@ class ntrisSession(LineReceiver):
       try:
         cursor.execute('INSERT INTO user VALUES (%s, %s, %s)',
             (name, email, password_hash))
+        cursor.commit()
       except MySQLdb.IntegrityError:
         error = 'That username is already taken.'
     if error:
@@ -185,6 +189,8 @@ class ntrisSession(LineReceiver):
   def on_join_room(self, name):
     if name in self.rooms:
       return self.send_message('join_room_error', 'You are already a member of that room.')
+    elif len(self.rooms) >= 6:
+      return self.send_message('join_room_error', 'You cannot join more than 6 rooms.')
     elif name not in self.server.rooms:
       return self.send_message('join_room_error', 'That room no longer exists.')
     room = self.server.rooms[name]
