@@ -1,6 +1,7 @@
 package {
   import flash.display.MovieClip;
   import flash.events.KeyboardEvent;
+  import flash.events.MouseEvent;
   import flash.events.TimerEvent;
   import flash.external.ExternalInterface;
   import flash.utils.Timer;
@@ -45,6 +46,7 @@ package {
     private static const PLAYING:int = 0;
     private static const PAUSED:int = 1;
     private static const GAMEOVER:int = 2;
+    private static const CLICK_TO_PLAY:int = 3;
 
     // Game engine constants.
     private static const FRAMERATE:int = 50;
@@ -150,8 +152,9 @@ package {
       lastPos = new Point();
       optimize = false;
 
-      ExternalInterface.addCallback('start', startTimer);
+      ExternalInterface.addCallback('start', startSingleplayer);
       ExternalInterface.addCallback('pause', pauseTimer);
+      ExternalInterface.addCallback('unpause', startTimer);
       ExternalInterface.addCallback('deserialize', deserialize);
       ExternalInterface.call('ntris.board_callback', html_id, local);
     }
@@ -160,12 +163,24 @@ package {
       return Object(LoaderInfo(this.loaderInfo).parameters);
     }
 
+    public function startSingleplayer():void {
+      stage.addEventListener(MouseEvent.MOUSE_DOWN, clicked);
+      state = CLICK_TO_PLAY;
+      draw();
+    }
+
+    public function clicked(e:MouseEvent):void {
+      stage.removeEventListener(MouseEvent.MOUSE_DOWN, clicked);
+      state = PLAYING;
+      startTimer();
+    }
+
     public function startTimer():void {
+      afterTime = getTimer();
       if (timer == null) {
         timer = new Timer(FRAMEDELAY, 1);
         timer.addEventListener(TimerEvent.TIMER, gameLoop);
       } else {
-        afterTime = getTimer();
         timer.delay = FRAMEDELAY;
       }
       timer.start();
@@ -675,10 +690,13 @@ package {
       // Draw the score and framerate. If the game is paused or over, draw text.
       scoreText.text = "" + score;
       drawTextField(canvasBD, scoreText);
-      if (state == PAUSED) {
+      if (state == PAUSED || state == CLICK_TO_PLAY) {
         fillRect(canvasBD, BORDER, BORDER, WIDTH - 2*BORDER,
                  HEIGHT - 2*BORDER, Color.BLACK);
         stateText.text = "-- PAUSED --\nPress ENTER to resume";
+        if (state == CLICK_TO_PLAY) {
+          stateText.text = "Click on this board to play!";
+        }
         drawTextField(canvasBD, stateText);
       } else if (state == GAMEOVER) {
         canvasBD.colorTransform(new Rectangle(0, 0, WIDTH, HEIGHT), redTint);

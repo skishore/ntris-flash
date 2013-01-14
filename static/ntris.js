@@ -13,12 +13,13 @@ var ntris = {
 
   initialize: function() {
     this.ui.initialize();
-    this.create_room('lobby', 'Lobby');
 
     var sid = randint(0, 1 << 30);
     var name = 'guest' + randint(100000, 999999);
     this.user = this.create_user(sid, name);
     this.user.original_name = this.user.name;
+
+    this.create_room('lobby', 'Lobby');
 
     if (window.hasOwnProperty('after_initialize')) {
       window.after_initialize();
@@ -103,6 +104,7 @@ var ntris = {
       };
       this.rooms[name] = room;
       this.ui.create_room_tab(room);
+      this.create_board(room, this.user);
     }
     return this.rooms[name];
   },
