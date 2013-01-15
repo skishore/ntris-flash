@@ -141,8 +141,10 @@ class ntrisSession(LineReceiver):
       error = 'Your username must be between 4 and 32 characters.'
     elif not name.isalnum():
       error = 'Your username must be alphanumeric.'
-    elif len(password) < 4 or len(password) > 64:
-      error = 'Your password must be between 8 and 64 characters.'
+    elif len(email) > 64:
+      error = 'Your email must less than 64 characters.'
+    elif len(password) < 4 or len(password) > 256:
+      error = 'Your password must be between 4 and 256 characters.'
     else:
       password_hash = md5.new(password).hexdigest()
       try:
