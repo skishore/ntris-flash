@@ -198,6 +198,8 @@ class ntrisSession(LineReceiver):
     room = self.server.rooms[name]
     if len(room.members) >= 6:
       return self.send_message('join_room_error', 'That room is now full.')
+    if room.game and room.game.started:
+      return self.send_message('join_room_error', 'That room is playing a game. You can spectate!')
     self.send_message('join_room', dict(
         name=room.name,
         label=room.label,
@@ -218,44 +220,49 @@ class ntrisSession(LineReceiver):
 
   @handler
   def on_create_game(self, data):
-    name = data.pop('room')
+    # TODO: Add validation for other fields in data.
+    name = data['room']
     if name not in self.rooms:
-      return self.send_message('create_game_error', 'You are not a member of this room.')
+      return self.send_message('create_game_error', 'You are no longer a member of this room.')
     room = self.rooms[name]
     if room.game and room.game.started:
       return self.send_message('create_game_error', "You can't propose a game while one is being played!")
-    self.send_message('game_created', '')
-    room.set_game(ntrisGame(self.sid, rules))
+    self.send_message('create_game', '')
+    room.set_game(ntrisGame(self, data['rules']))
 
   @handler
   def on_accept_game(self, data):
-    name = data.pop('room')
+    name = data['room']
     if name in self.rooms:
       room = self.rooms[name]
-      if room.game and room.game.rules == data and self.sid not in room.game.accepted:
-        room.game.accepted.append(self.sid)
-        return room.update_game_status()
+      if room.game and room.game.rules == data['rules']:
+        if self.sid not in room.game.acceptances:
+          room.game.acceptances.append(self.sid)
+          return room.update_game_status()
       self.send_message('room_update', room.to_dict())
 
   @handler
   def on_reject_game(self, data):
-    name = data.pop('room')
+    name = data['room']
     if name in self.rooms:
       room = self.rooms[name]
-      if room.game and room.game.rules == data and not room.game.started:
-        return room.clear_game()
+      if room.game and room.game.rules == data['rules']:
+        if not room.game.started:
+          return room.clear_game(self.name)
       self.send_message('room_update', room.to_dict())
 
 # Class that stores data about the rules and status of a multiplayer game.
 class ntrisGame(object):
-  def __init__(self, sid, rules):
-    self.accepted = [sid]
+  def __init__(self, session, rules):
+    self.proposer = session.name
+    self.acceptances = [session.sid]
     self.rules = rules
     self.started = False
 
   def to_dict(self):
     return dict(
-        num_accepted=len(self.accepted),
+        proposer=self.proposer,
+        acceptances=self.acceptances,
         rules=self.rules,
         started=self.started,
       )
@@ -268,6 +275,7 @@ class ntrisRoom(object):
     self.label = label
     self.members = {}
     self.game = None
+    self.last_rejection=None
 
   def to_dict(self):
     return dict(
@@ -275,6 +283,7 @@ class ntrisRoom(object):
         label=self.label,
         members=[session.to_dict() for session in self.members.itervalues()],
         game=(self.game.to_dict() if self.game else None),
+        last_rejection=self.last_rejection,
       )
 
   def add_user(self, session):
@@ -298,13 +307,14 @@ class ntrisRoom(object):
 
   def update_game_status(self):
     if self.game:
-      self.game.accepted = [sid for sid in self.game.accepted in sid in self.members]
-      if len(self.game.accepted) > max(len(self.members)/2, 1):
+      self.game.acceptances = [sid for sid in self.game.acceptances if sid in self.members]
+      if len(self.game.acceptances) > max(len(self.members)/2, 1):
         self.game.started = True
     self.broadcast('room_update', self.to_dict())
 
-  def clear_game(self):
+  def clear_game(self, rejection):
     self.game = None
+    self.last_rejection = rejection
     self.broadcast('room_update', self.to_dict())
 
   def broadcast(self, type, data):

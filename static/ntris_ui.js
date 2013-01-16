@@ -76,14 +76,13 @@ var ntris_ui = {
     $('#create-game-dialog').dialog($.extend(attrs, {
       buttons: {
         Submit: function() {
-          var game = {
-            room: $('#create-game-room').val(),
+          var rules = {
             type: $('#game-type').val(),
           };
-          if (game.type == 'sprint') {
-            game.target = $('#point-target').slider('option', 'value');
+          if (rules.type == 'sprint') {
+            rules.target = $('#point-target').slider('option', 'value');
           }
-          ntris.submit_create_game(game);
+          ntris.submit_create_game($('#create-game-room').val(), rules);
         },
         Cancel: function() {
           $('#create-game-dialog').dialog('close');
@@ -164,15 +163,14 @@ var ntris_ui = {
   },
 
   show_create_game_dialog: function(elt) {
-    var id = elt.parentElement.parentElement.parentElement.parentElement.id;
-    $('#create-game-room').val(id.substring(0, id.length - 5));
-
     $('#game-type').val('sprint');
     $('#game-type').trigger('change');
     $('#point-target').slider('option', 'value', 100);
     $('#point-target-value').html(100);
 
     this.show_dialog('create-game');
+    var id = elt.parentElement.parentElement.parentElement.parentElement.id;
+    $('#create-game-room').val(id.substring(0, id.length - 5));
   },
 
   show_dialog: function(dialog) {
@@ -230,6 +228,12 @@ var ntris_ui = {
       multiplayer.find('.header').html('Multiplayer:');
       multiplayer.find('.rooms').remove();
       multiplayer.append(this._multiplayer_prototype);
+      multiplayer.find('.accept-game').click(function() {
+        ntris.decide_game(room.name, true);
+      });
+      multiplayer.find('.reject-game').click(function() {
+        ntris.decide_game(room.name, false);
+      });
     }
 
     $('#' + room.id).find('.chat').keydown(function(e) {
@@ -275,7 +279,40 @@ var ntris_ui = {
     }
   },
 
-  update_room_sizes: function(name, label, size) {
+  update_game_state: function(room, last_rejection) {
+    // TODO: Use divs coded by sid instead of hardcoding proposer/rejector names
+    // here. This will allow us to change these names if the users log in/out.
+    var elt = $('#' + room.id + ' .multiplayer');
+    if (room.game) {
+      var rules = room.game.rules;
+      var html = '<div>' + room.game.proposer + ' has proposed these rules:</div>';
+      html += '<table class="rules-table">';
+      html += '<tr><td class="rules-header">Game type:</td><td class="rule">' + rules.type + '</td></tr>';
+      if (rules.type == 'sprint') {
+        html += '<tr><td class="rules-header">Point target:</td><td class="rule">' + rules.target + '</td></tr>';
+      }
+      html += '</table>';
+
+      var acceptances = room.game.acceptances.length;
+      html += '<div>' + acceptances + ' acceptance' + (acceptances == 1 ? '' : 's');
+      html += ' (need ' + Math.max(Math.floor(room.members.length/2) + 1, 2) + ')</div>';
+
+      elt.find('.multiplayer-rules').html(html);
+      // TODO: Hide these buttons if the user is among the acceptances.
+      elt.find('.create-game').addClass('hidden');
+      elt.find('.accept-game, .reject-game').removeClass('hidden');
+    } else {
+      var html = '<div>No one has proposed rules for a multiplayer game yet.</div>';
+      if (last_rejection) {
+        html = '<div>The last multiplayer game was rejected by ' + last_rejection + '.</div>';
+      }
+      elt.find('.multiplayer-rules').html(html);
+      elt.find('.create-game').removeClass('hidden');
+      elt.find('.accept-game, .reject-game').addClass('hidden');
+    }
+  },
+
+  update_room_sizes: function(name, label, size, in_game) {
     var cls = name + '-size';
     if (size) {
       var link_html = label + ' (' + size + (name == 'lobby' ? ')' : '/6)');
@@ -290,7 +327,7 @@ var ntris_ui = {
         }
       });
       $('.' + cls).click(function() {
-        ntris.ui.show_join_room_dialog(name, label, size);
+        ntris.ui.show_join_room_dialog(name, label, size, in_game);
       });
       $('#tablist a[href="#' + name + '-room"]').html(link_html);
     } else {

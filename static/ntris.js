@@ -89,15 +89,31 @@ var ntris = {
     }
   },
 
-  submit_create_game: function(game) {
+  submit_create_game: function(room, rules) {
     if (this.connected) {
-      if (game.type == 'battle') {
+      if (rules.type == 'battle') {
         this.ui.set_dialog_error('create-game', 'Battle mode has not been implemented yet.');
       } else {
-        this.socket.sendLine(JSON.stringify(['create_game', game]));
+        this.socket.sendLine(JSON.stringify(['create_game', {
+          room: room,
+          rules: rules,
+        }]));
       }
     } else {
       this.ui.set_dialog_error('create-game', 'Not connected to the server.');
+    }
+  },
+
+  decide_game: function(name, accept) {
+    if (this.connected && this.rooms.hasOwnProperty(name)) {
+      var game = this.rooms[name].game;
+      if (game) {
+        var update = (accept ? 'accept_game' : 'reject_game');
+        this.socket.sendLine(JSON.stringify([update, {
+          room: name,
+          rules: game.rules,
+        }]));
+      }
     }
   },
 
@@ -115,6 +131,7 @@ var ntris = {
         local_board: null,
         num_remote_boards: 0,
         remote_boards: {},
+        game: null,
       };
       this.rooms[name] = room;
       this.ui.create_room_tab(room);
@@ -252,7 +269,7 @@ var ntris = {
   },
 
   on_create_game_error: function(error) {
-    this.ui.set_dialog_error('join-room', error);
+    this.ui.set_dialog_error('create-game', error);
   },
 
   on_change_username: function(data) {
@@ -280,6 +297,10 @@ var ntris = {
     this.drop_room(name);
   },
 
+  on_create_game: function() {
+    this.ui.close_dialogs();
+  },
+
   on_room_update: function(data) {
     if (this.rooms.hasOwnProperty(data.room)) {
       var room = this.rooms[data.room];
@@ -298,10 +319,13 @@ var ntris = {
       for (i = 0; i < users_to_remove.length; i++) {
         this.remove_user_from_room(users_to_remove[i], room);
       }
+      room.game = data.game;
+      this.ui.update_game_state(room, data.last_rejection);
     } else if (data.members.indexOf(this.user.sid) != -1) {
       this.socket.sendLine(JSON.dumps(['leave_room', data.name]));
     }
-    this.ui.update_room_sizes(data.room, data.label, data.members.length);
+    var in_game = (data.game && data.game.started);
+    this.ui.update_room_sizes(data.room, data.label, data.members.length, in_game);
   },
 
   on_board_update: function(data) {

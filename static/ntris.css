@@ -320,3 +320,16 @@ button.logged-in {
 .ui-button, .ui-slider-handle {
   border: 1px solid #AAA!important;
 }
+
+.rules-table {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.rules-header {
+  font-weight: bold;
+}
+
+.rules-header, .rule {
+  padding: 6px 0px 2px;
+}
