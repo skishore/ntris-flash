@@ -92,7 +92,9 @@
       </table>
       -->
     </div>
-    <button class="create-game">Play multiplayer!</button>
+    <button class="create-game" onclick="ntris.ui.show_create_game_dialog(this)">
+      Play multiplayer!
+    </button>
     <button class="accept-game hidden">Accept</button>
     <button class="reject-game hidden">Reject</button>
   </div>
@@ -154,4 +156,29 @@
   <div id="room-details"></div>
   <div id="room-membership"></div>
   <div id="join-room-error" class="error"></div>
+</div>
+
+<div id="create-game-dialog" title="Propose a game">
+  <form><fieldset>
+    <table>
+      <tr>
+        <td><label for="game-type">Game type:</label></td>
+        <td>
+          <select id="game-type">
+            <option value="battle">Battle</option>
+            <option value="sprint">Sprint</option>
+          </select>
+        </td>
+      </tr>
+      <tr id="point-target-row" class="hidden">
+        <td><label for="point-target">Point target:</label></td>
+        <td>
+          <span id="point-target-value">50</span>
+          <div id="point-target"></div>
+        </td>
+      </tr>
+      <input type="text" id="create-game-room" class="hidden">
+    </table>
+  </fieldset></form>
+  <div id="create-game-error" class="error"></div>
 </div>

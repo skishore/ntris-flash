@@ -89,6 +89,18 @@ var ntris = {
     }
   },
 
+  submit_create_game: function(game) {
+    if (this.connected) {
+      if (game.type == 'battle') {
+        this.ui.set_dialog_error('create-game', 'Battle mode has not been implemented yet.');
+      } else {
+        this.socket.sendLine(JSON.stringify(['create_game', game]));
+      }
+    } else {
+      this.ui.set_dialog_error('create-game', 'Not connected to the server.');
+    }
+  },
+
   logout: function() {
     this.socket.sendLine(JSON.stringify(['logout', this.user.original_name]));
   },
@@ -236,6 +248,10 @@ var ntris = {
   },
 
   on_join_room_error: function(error) {
+    this.ui.set_dialog_error('join-room', error);
+  },
+
+  on_create_game_error: function(error) {
     this.ui.set_dialog_error('join-room', error);
   },
 

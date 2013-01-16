@@ -72,6 +72,39 @@ var ntris_ui = {
     });
 
     $('#join-room-dialog').dialog($.extend(attrs, {}));
+
+    $('#create-game-dialog').dialog($.extend(attrs, {
+      buttons: {
+        Submit: function() {
+          var game = {
+            room: $('#create-game-room').val(),
+            type: $('#game-type').val(),
+          };
+          if (game.type == 'sprint') {
+            game.target = $('#point-target').slider('option', 'value');
+          }
+          ntris.submit_create_game(game);
+        },
+        Cancel: function() {
+          $('#create-game-dialog').dialog('close');
+        },
+      },
+    }));
+    $('#game-type').change(function() {
+      if ($(this).val() == 'sprint') {
+        $('#point-target-row').removeClass('hidden');
+      } else {
+        $('#point-target-row').addClass('hidden');
+      }
+    });
+    $('#point-target').slider({
+      min: 50,
+      max: 250,
+      step: 50,
+      slide: function(event, ui) {
+        $('#point-target-value').html(ui.value);
+      },
+    });
   },
 
   show_join_room_dialog: function(name, label, size, in_game) {
@@ -128,6 +161,18 @@ var ntris_ui = {
         },
       });
     this.show_dialog('join-room');
+  },
+
+  show_create_game_dialog: function(elt) {
+    var id = elt.parentElement.parentElement.parentElement.parentElement.id;
+    $('#create-game-room').val(id.substring(0, id.length - 5));
+
+    $('#game-type').val('sprint');
+    $('#game-type').trigger('change');
+    $('#point-target').slider('option', 'value', 100);
+    $('#point-target-value').html(100);
+
+    this.show_dialog('create-game');
   },
 
   show_dialog: function(dialog) {

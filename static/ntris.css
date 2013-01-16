@@ -20,6 +20,10 @@ body {
   font-size: 12px;
 }
 
+.ui-dialog button {
+  font-size: 16px!important;
+}
+
 .error {
   color: red;
   font-size: 12px;
@@ -305,4 +309,14 @@ button.logged-in {
 
 .reject-game:active {
   background-color: #C33;
+}
+
+#point-target {
+  font-size: 12px;
+  margin: -13px 0px 0px 28px;
+  width: 120px;
+}
+
+.ui-button, .ui-slider-handle {
+  border: 1px solid #AAA!important;
 }

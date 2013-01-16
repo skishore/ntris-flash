@@ -216,6 +216,50 @@ class ntrisSession(LineReceiver):
     if name in self.rooms:
       self.rooms[name].remove_user(self)
 
+  @handler
+  def on_create_game(self, data):
+    name = data.pop('room')
+    if name not in self.rooms:
+      return self.send_message('create_game_error', 'You are not a member of this room.')
+    room = self.rooms[name]
+    if room.game and room.game.started:
+      return self.send_message('create_game_error', "You can't propose a game while one is being played!")
+    self.send_message('game_created', '')
+    room.set_game(ntrisGame(self.sid, rules))
+
+  @handler
+  def on_accept_game(self, data):
+    name = data.pop('room')
+    if name in self.rooms:
+      room = self.rooms[name]
+      if room.game and room.game.rules == data and self.sid not in room.game.accepted:
+        room.game.accepted.append(self.sid)
+        return room.update_game_status()
+      self.send_message('room_update', room.to_dict())
+
+  @handler
+  def on_reject_game(self, data):
+    name = data.pop('room')
+    if name in self.rooms:
+      room = self.rooms[name]
+      if room.game and room.game.rules == data and not room.game.started:
+        return room.clear_game()
+      self.send_message('room_update', room.to_dict())
+
+# Class that stores data about the rules and status of a multiplayer game.
+class ntrisGame(object):
+  def __init__(self, sid, rules):
+    self.accepted = [sid]
+    self.rules = rules
+    self.started = False
+
+  def to_dict(self):
+    return dict(
+        num_accepted=len(self.accepted),
+        rules=self.rules,
+        started=self.started,
+      )
+
 # Class that stores data about the users in a given room.
 class ntrisRoom(object):
   def __init__(self, server, name, label):
@@ -223,28 +267,45 @@ class ntrisRoom(object):
     self.name = name
     self.label = label
     self.members = {}
+    self.game = None
 
   def to_dict(self):
     return dict(
         room=self.name,
         label=self.label,
         members=[session.to_dict() for session in self.members.itervalues()],
+        game=(self.game.to_dict() if self.game else None),
       )
 
   def add_user(self, session):
     if session.sid not in self.members:
       self.members[session.sid] = session
       session.rooms[self.name] = self
-      self.server.broadcast('room_update', self.to_dict())
+      self.update_game_status()
 
   def remove_user(self, session):
     if session.sid in self.members:
       del self.members[session.sid]
       if self.name in session.rooms:
         del session.rooms[self.name]
-      self.server.broadcast('room_update', self.to_dict())
+      self.update_game_status()
       if self.name != 'lobby' and not len(self.members):
         del self.server.rooms[self.name]
+
+  def set_game(self, game):
+    self.game = game
+    self.broadcast('room_update', self.to_dict())
+
+  def update_game_status(self):
+    if self.game:
+      self.game.accepted = [sid for sid in self.game.accepted in sid in self.members]
+      if len(self.game.accepted) > max(len(self.members)/2, 1):
+        self.game.started = True
+    self.broadcast('room_update', self.to_dict())
+
+  def clear_game(self):
+    self.game = None
+    self.broadcast('room_update', self.to_dict())
 
   def broadcast(self, type, data):
     line = json.dumps([type, data])
