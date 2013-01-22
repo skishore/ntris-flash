@@ -163,14 +163,26 @@ var ntris_ui = {
   },
 
   show_create_game_dialog: function(elt) {
-    $('#game-type').val('sprint');
-    $('#game-type').trigger('change');
-    $('#point-target').slider('option', 'value', 100);
-    $('#point-target-value').html(100);
+    var id = elt.parentElement.parentElement.parentElement.parentElement.id;
+    var name = id.substring(0, id.length - 5);
+
+    if (ntris.rooms.hasOwnProperty(name) && ntris.rooms[name].last_game) {
+      var rules = ntris.rooms[name].last_game.rules;
+      $('#game-type').val(rules.type);
+      $('#game-type').trigger('change');
+      if (rules.type == 'sprint') {
+        $('#point-target').slider('option', 'value', rules.target);
+        $('#point-target-value').html(rules.target);
+      }
+    } else {
+      $('#game-type').val('sprint');
+      $('#game-type').trigger('change');
+      $('#point-target').slider('option', 'value', 100);
+      $('#point-target-value').html(100);
+    }
 
     this.show_dialog('create-game');
-    var id = elt.parentElement.parentElement.parentElement.parentElement.id;
-    $('#create-game-room').val(id.substring(0, id.length - 5));
+    $('#create-game-room').val(name);
   },
 
   show_dialog: function(dialog) {
@@ -279,7 +291,7 @@ var ntris_ui = {
     }
   },
 
-  update_game_state: function(room, last_rejection) {
+  update_game_state: function(room) {
     // TODO: Use divs coded by sid instead of hardcoding proposer/rejector names
     // here. This will allow us to change these names if the users log in/out.
     var elt = $('#' + room.id + ' .multiplayer');
@@ -316,8 +328,8 @@ var ntris_ui = {
       }
     } else {
       var html = '<div>No one has proposed rules for a multiplayer game yet.</div>';
-      if (last_rejection) {
-        html = '<div>The last multiplayer game was rejected by ' + last_rejection + '.</div>';
+      if (room.last_game) {
+        html = '<div>The last multiplayer game was rejected by ' + room.last_game.rejector + '.</div>';
       }
       elt.find('.multiplayer-rules').html(html);
       elt.find('.create-game').removeClass('hidden');

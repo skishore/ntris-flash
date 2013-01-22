@@ -320,7 +320,8 @@ var ntris = {
         this.remove_user_from_room(users_to_remove[i], room);
       }
       room.game = data.game;
-      this.ui.update_game_state(room, data.last_rejection);
+      room.last_game = data.last_game;
+      this.ui.update_game_state(room);
     } else if (data.members.indexOf(this.user.sid) != -1) {
       this.socket.sendLine(JSON.dumps(['leave_room', data.name]));
     }

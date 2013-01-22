@@ -258,6 +258,7 @@ class ntrisGame(object):
     self.acceptances = [session.sid]
     self.rules = rules
     self.started = False
+    self.rejector = None
 
   def to_dict(self):
     return dict(
@@ -265,7 +266,11 @@ class ntrisGame(object):
         acceptances=self.acceptances,
         rules=self.rules,
         started=self.started,
+        rejector=self.rejector,
       )
+
+  def start(self):
+    self.started = True
 
 # Class that stores data about the users in a given room.
 class ntrisRoom(object):
@@ -275,7 +280,7 @@ class ntrisRoom(object):
     self.label = label
     self.members = {}
     self.game = None
-    self.last_rejection=None
+    self.last_game=None
 
   def to_dict(self):
     return dict(
@@ -283,7 +288,7 @@ class ntrisRoom(object):
         label=self.label,
         members=[session.to_dict() for session in self.members.itervalues()],
         game=(self.game.to_dict() if self.game else None),
-        last_rejection=self.last_rejection,
+        last_game=(self.last_game.to_dict() if self.last_game else None),
       )
 
   def add_user(self, session):
@@ -302,6 +307,7 @@ class ntrisRoom(object):
         del self.server.rooms[self.name]
 
   def set_game(self, game):
+    self.last_game = None
     self.game = game
     self.broadcast('room_update', self.to_dict())
 
@@ -309,12 +315,13 @@ class ntrisRoom(object):
     if self.game:
       self.game.acceptances = [sid for sid in self.game.acceptances if sid in self.members]
       if len(self.game.acceptances) > max(len(self.members)/2, 1):
-        self.game.started = True
+        self.game.start()
     self.broadcast('room_update', self.to_dict())
 
-  def clear_game(self, rejection):
+  def clear_game(self, rejector):
+    self.game.rejector = rejector
+    self.last_game = self.game
     self.game = None
-    self.last_rejection = rejection
     self.broadcast('room_update', self.to_dict())
 
   def broadcast(self, type, data):
