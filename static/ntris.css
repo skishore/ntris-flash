@@ -333,3 +333,7 @@ button.logged-in {
 .rules-header, .rule {
   padding: 6px 0px 2px;
 }
+
+.accepted {
+  margin-top: 8px;
+}

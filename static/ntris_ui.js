@@ -297,10 +297,23 @@ var ntris_ui = {
       html += '<div>' + acceptances + ' acceptance' + (acceptances == 1 ? '' : 's');
       html += ' (need ' + Math.max(Math.floor(room.members.length/2) + 1, 2) + ')</div>';
 
+      var accepted = (room.game.acceptances.indexOf(ntris.user.sid) != -1);
+      if (accepted) {
+        html += '<div class="accepted">You accepted! You can still '
+        html += '<a class="reject-link" href="#">reject this game</a>.</div>';
+      }
+
       elt.find('.multiplayer-rules').html(html);
-      // TODO: Hide these buttons if the user is among the acceptances.
       elt.find('.create-game').addClass('hidden');
-      elt.find('.accept-game, .reject-game').removeClass('hidden');
+      if (accepted) {
+        elt.find('.accept-game, .reject-game').addClass('hidden');
+        elt.find('.reject-link').click(function(event) {
+          ntris.decide_game(room.name, false);
+          event.preventDefault();
+        });
+      } else {
+        elt.find('.accept-game, .reject-game').removeClass('hidden');
+      }
     } else {
       var html = '<div>No one has proposed rules for a multiplayer game yet.</div>';
       if (last_rejection) {
