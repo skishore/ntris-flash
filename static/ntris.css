@@ -70,7 +70,7 @@ button.logged-in {
 
 #tabs {
   margin-top: 16px;
-  width: 1132px;
+  width: 1128px;
 }
 
 #tablist button {
@@ -178,13 +178,11 @@ button.logged-in {
 
 .left-side {
   float: left;
-  width: 770px;
-  height: 500px;
+  width: 764px;
 }
 
 .left-side.container {
-  width: 458px;
-  height: auto;
+  width: 452px;
 }
 
 .welcome-message {
@@ -208,7 +206,6 @@ button.logged-in {
 .right-side {
   float: left;
   width: 350px;
-  height: 500px;
 }
 
 .game.header {
