@@ -182,6 +182,29 @@ button.logged-in {
   height: 500px;
 }
 
+.left-side.container {
+  width: 458px;
+  height: auto;
+}
+
+.welcome-message {
+  border: solid #AAA;
+  border-radius: 0px 0px 2px 2px;
+  border-width: 0px 1px 1px;
+  height: 191px;
+  padding: 8px;
+}
+
+.instructions {
+  font-size: 12px;
+  margin: 8px 0px 0px;
+  padding: 0px 0px 0px 28px;
+}
+
+.instructions li {
+  margin-bottom: 4px;
+}
+
 .right-side {
   float: left;
   width: 350px;
