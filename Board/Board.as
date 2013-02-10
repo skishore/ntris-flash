@@ -22,6 +22,7 @@ package {
   import Color;
   import Key;
   import KeyRepeater;
+  import Random;
 
   public class Board extends MovieClip {
     private static const DEBUG:Boolean = false;
@@ -298,7 +299,7 @@ package {
       var level:int = Block.LEVELS - 1;
 
       // Calculate the ratio r between the probability of different levels.
-      var p:Number = Math.random();
+      var p:Number = Random.random();
       var x:Number = 2.0*(score - RINTERVAL)/RINTERVAL;
       var r:Number = (MAXR - MINR)*(x/Math.sqrt(x*x + 1) + 1)/2 + MINR;
 
@@ -311,7 +312,7 @@ package {
         }
       }
 
-      return Math.floor(Math.random()*Block.TYPES[level]);
+      return Random.randint(Block.TYPES[level]);
     }
 
 //-------------------------------------------------------------------------
