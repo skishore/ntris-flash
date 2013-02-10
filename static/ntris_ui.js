@@ -205,14 +205,17 @@ var ntris_ui = {
     $('#topbar').html('Status: in guest mode as ' + ntris.user.name);
   },
 
-  change_username: function(name, logged_in) {
-    if (logged_in) {
-      $('#tabs').addClass('logged-in');
-      $('#topbar').html('Status: logged in as ' + name);
-    } else {
-      $('#tabs').removeClass('logged-in');
-      $('#topbar').html('Status: in guest mode as ' + name);
+  change_username: function(user, logged_in) {
+    if (user.sid == ntris.user.sid) {
+      if (logged_in) {
+        $('#tabs').addClass('logged-in');
+        $('#topbar').html('Status: logged in as ' + user.name);
+      } else {
+        $('#tabs').removeClass('logged-in');
+        $('#topbar').html('Status: in guest mode as ' + user.name);
+      }
     }
+    $('.' + user.cls).html(user.name);
   },
 
   create_room_tab: function(room) {
@@ -376,20 +379,6 @@ var ntris_ui = {
     user_list.menu('refresh');
   },
 
-  change_username_in_room: function(user, room) {
-    $('#' + room.id).find('.' + user.cls).html(user.name);
-    var local = (user === ntris.user);
-    var board = null;
-    if (local && room.local_board) {
-      board = room.local_board;
-    } else if (!local && room.remote_boards.hasOwnProperty(user.sid)) {
-      board = room.remote_boards[user.sid];
-    }
-    if (board) {
-      $('#' + board.id).siblings('.header').html(user.name);
-    }
-  },
-
   remove_user_from_room: function(user, room) {
     var user_list = $('#' + room.id).find('.users');
     user_list.find('.' + user.cls).remove();
@@ -413,7 +402,7 @@ var ntris_ui = {
     var id = room.id + '-' + user.cls + '-board';
 
     var html = '<div class="' + cls + ' container">';
-    html += '<div class="header">' + user.name + '</div>';
+    html += '<div class="' + user.cls + ' header">' + user.name + '</div>';
     html += '<div id="' + id + '" class="' + cls + '"></div></div>';
     $('#' + room.id).find(target).append(html);
 

@@ -279,15 +279,11 @@ var ntris = {
   on_change_username: function(data) {
     if (data.sid == this.user.sid) {
       this.ui.close_dialogs();
-      this.ui.change_username(data.name, data.logged_in);
     }
-
     var user = this.create_user(data.sid, data.name);
     if (user.name != data.name) {
       user.name = data.name;
-      for (var i = 0; i < user.rooms.length; i++) {
-        this.ui.change_username_in_room(user, user.rooms[i]);
-      }
+      this.ui.change_username(user, data.logged_in);
     }
   },
 
