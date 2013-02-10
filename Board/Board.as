@@ -24,7 +24,7 @@ package {
   import KeyRepeater;
 
   public class Board extends MovieClip {
-    private static const DEBUG:Boolean = true;
+    private static const DEBUG:Boolean = false;
 
     // Variables read from flashVars. SQUAREWIDTH is also set by flashVars.
     private static var html_id:String;
