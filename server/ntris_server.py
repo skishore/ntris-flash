@@ -200,7 +200,7 @@ class ntrisSession(LineReceiver):
     room = self.server.rooms[name]
     if len(room.members) >= 6:
       return self.send_message('join_room_error', 'That room is now full.')
-    if room.game and room.game.started:
+    if room.game and room.game.accepted:
       return self.send_message('join_room_error', 'That room is playing a game. You can spectate!')
     self.send_message('join_room', dict(
         name=room.name,
@@ -227,7 +227,7 @@ class ntrisSession(LineReceiver):
     if name not in self.rooms:
       return self.send_message('create_game_error', 'You are no longer a member of this room.')
     room = self.rooms[name]
-    if room.game and room.game.started:
+    if room.game and room.game.accepted:
       return self.send_message('create_game_error', "You can't propose a game while one is being played!")
     self.send_message('create_game', '')
     room.set_game(ntrisGame(self, data['rules']))
@@ -249,7 +249,7 @@ class ntrisSession(LineReceiver):
     if name in self.rooms:
       room = self.rooms[name]
       if room.game and room.game.rules == data['rules']:
-        if not room.game.started:
+        if not room.game.accepted:
           return room.clear_game(self.name)
       self.send_message('room_update', room.to_dict())
 
