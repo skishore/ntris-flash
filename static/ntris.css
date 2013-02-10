@@ -70,7 +70,7 @@ button.logged-in {
 
 #tabs {
   margin-top: 16px;
-  width: 1160px;
+  width: 1132px;
 }
 
 #tablist button {
@@ -87,21 +87,22 @@ button.logged-in {
 }
 
 .room-tab {
-  height: 541px;
+  height: 490px;
+  padding: 8px 6px !important;
 }
 
 .room-tab[aria-hidden='true'] {
   display: block !important;
-  border:none!important;
-  visibility:hidden!important;
+  border: none !important;
+  visibility: hidden !important;
 }
 
 .room-tab[aria-hidden='true'],
 .room-tab[aria-hidden='true'] * {
-  height: 0!important;
-  width: 0!important;
-  margin: 0!important;
-  padding: 0!important;
+  height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .container {
@@ -146,7 +147,7 @@ button.logged-in {
 .chatbox {
   border: solid #AAA;
   border-width: 0px 1px;
-  height: 220px;
+  height: 182px;
   width: 328;
 
   font-size: 12px;
@@ -160,7 +161,7 @@ button.logged-in {
 }
 
 .ui-menu {
-  height: 220px;
+  height: 203px;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
   border-width: 0px 1px 1px;
@@ -177,9 +178,6 @@ button.logged-in {
 
 .left-side {
   float: left;
-  padding-top: 8px;
-  padding-left: 11px;
-  padding-right: 8px;
   width: 770px;
   height: 500px;
 }
@@ -199,9 +197,7 @@ button.logged-in {
 }
 
 .large-board.container {
-  margin-top: 24px;
-  margin-left: 4px;
-  margin-right: 12px;
+  margin: 23px 8px;
   width: 280px;
 }
 
@@ -211,8 +207,7 @@ button.logged-in {
 }
 
 .board.container {
-  margin-left: 4px;
-  margin-right: 12px;
+  margin: 8px;
   width: 140px;
   height: auto;
 }
