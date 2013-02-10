@@ -115,6 +115,7 @@ package {
     // Auxiliary board variables.
     private var repeater:KeyRepeater;
     private var keysFired:Vector.<int>;
+    private var rng:Random;
 
     // Draw optimization variables.
     private var lastPos:Point;
@@ -148,6 +149,7 @@ package {
         keysFired = new Vector.<int>();
       }
 
+      rng = new Random();
       resetBoard();
 
       lastPos = new Point();
@@ -299,7 +301,7 @@ package {
       var level:int = Block.LEVELS - 1;
 
       // Calculate the ratio r between the probability of different levels.
-      var p:Number = Random.random();
+      var p:Number = rng.random();
       var x:Number = 2.0*(score - RINTERVAL)/RINTERVAL;
       var r:Number = (MAXR - MINR)*(x/Math.sqrt(x*x + 1) + 1)/2 + MINR;
 
@@ -312,7 +314,7 @@ package {
         }
       }
 
-      return Random.randint(Block.TYPES[level]);
+      return rng.randint(Block.TYPES[level]);
     }
 
 //-------------------------------------------------------------------------

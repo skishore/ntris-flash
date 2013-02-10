@@ -1,25 +1,42 @@
 package {
   import flash.utils.getTimer;
 
-  // This is an ActionScript implementation of the Central Randomizer,
-  // copyright 1997 by Paul Houle (paul@honeylocust.com).
-  // See: http://www.honeylocust.com/javascript/randomizer.html
   public class Random {
-    private static const MAX_SEED:int = 233280;
-    private static var s:int = int(getTimer()) % MAX_SEED;
+    private var MT:Vector.<uint> = new Vector.<uint>(624, true);
+    private var index:int;
 
-    public static function seed(new_s:int):void {
-      s = new_s  % MAX_SEED;
+    public function Random(s:int=0) {
+      s = s || getTimer();
+      seed(s);
     }
 
-    public static function random():Number {
-      s = (9301*s + 49297) % MAX_SEED;
-      return 1.0*s/MAX_SEED;
+    public function seed(s:int):void {
+      index = 0;
+      for (var i:int = 0; i < 624; i++) {
+        MT[i] = s;
+        s = 1812433253 * (Number(s ^ (s >>> 30)) + i & 0xFFFFFFFF);
+      }
     }
 
-    public static function randint(n:int):int {
-      s = (9301*s + 49297) % MAX_SEED;
-      return Math.min(Math.floor(n*(1.0*s/MAX_SEED)), n - 1);
+    public function randword():uint {
+      var i:int = index;
+      index = (index + 1) % 624;
+      var y:uint = MT[i];
+      var z:uint = (MT[i] & 0x80000000) | (MT[index] & 0x7fffffff);
+      MT[i] = (MT[(i + 397) % 624] ^ (z >>> 1)) ^ (0x9908b0df & (-(z & 1)));
+      y ^= y >>> 11;
+      y ^= (y << 7) & 0x9d2c5680;
+      y ^= (y << 15) & 0xefc60000;
+      y ^= y >>> 18;
+      return y;
+    }
+
+    public function random():Number {
+      return randword() / (uint.MAX_VALUE + Number.MIN_VALUE);
+    }
+
+    public function randint(n:int):int {
+      return randword() % n;
     }
   }
 }
