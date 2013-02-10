@@ -89,6 +89,7 @@ package {
     private var yPos:int;
     private var canvasBD:BitmapData;
     private var redTint:ColorTransform;
+    private var blueTint:ColorTransform;
     private var scoreText:TextField;
     private var stateText:TextField;
 
@@ -116,6 +117,8 @@ package {
     private var repeater:KeyRepeater;
     private var keysFired:Vector.<int>;
     private var rng:Random;
+    private var game_type:String;
+    private var rules:Object;
 
     // Draw optimization variables.
     private var lastPos:Point;
@@ -150,12 +153,15 @@ package {
       }
 
       rng = new Random();
+      game_type = 'singleplayer';
+      rules = new Object();
       resetBoard();
 
       lastPos = new Point();
       optimize = false;
 
       ExternalInterface.addCallback('start', startSingleplayer);
+      ExternalInterface.addCallback('set_rules', setRules);
       ExternalInterface.addCallback('pause', pauseTimer);
       ExternalInterface.addCallback('unpause', startTimer);
       ExternalInterface.addCallback('deserialize', deserialize);
@@ -176,6 +182,22 @@ package {
       stage.removeEventListener(MouseEvent.MOUSE_DOWN, clicked);
       state = PLAYING;
       startTimer();
+    }
+
+    public function setRules(seed:uint, spec:String):void {
+      if (state == CLICK_TO_PLAY) {
+        clicked(new MouseEvent('dummy'));
+      }
+
+      rng.seed(seed);
+      if (spec == 'singleplayer') {
+        game_type = 'singleplayer';
+        rules = new Object();
+      } else {
+        rules = JSON.parse(spec);
+        game_type = rules.type;
+      }
+      resetBoard();
     }
 
     public function startTimer():void {
@@ -211,6 +233,10 @@ package {
       redTint = new ColorTransform();
       redTint.redMultiplier = 0.5;
       redTint.redOffset = 128;
+
+      blueTint = new ColorTransform();
+      blueTint.blueMultiplier = 0.5;
+      blueTint.blueOffset = 128;
 
       var large:Boolean = (SQUAREWIDTH > 10);
 
@@ -341,18 +367,25 @@ package {
           previewOffset = previewOffset*previewFrame/(previewFrame + 1);
         }
 
-        if (curBlock != null && curBlock.rowsFree < 0) {
-          state = GAMEOVER;
-          optimize = false;
+        if (game_type == 'sprint' && score >= rules.target) {
+          resolveGame('success');
+        } else if (curBlock != null && curBlock.rowsFree < 0) {
+          resolveGame('failure');
         }
       } else if (keysFired.indexOf(Key.PAUSE) >= 0) {
         if (state == PAUSED) {
           state = PLAYING;
-        } else {
+        } else if (game_type == 'singleplayer') {
           resetBoard();
         }
         optimize = false;
       }
+    }
+
+    private function resolveGame(outcome:String):void {
+      state = GAMEOVER;
+      rules.outcome = outcome;
+      optimize = false;
     }
 
     // Returns the next block. If swap is not null, holds the swapped block
@@ -702,9 +735,14 @@ package {
         }
         drawTextField(canvasBD, stateText);
       } else if (state == GAMEOVER) {
-        canvasBD.colorTransform(new Rectangle(0, 0, WIDTH, HEIGHT), redTint);
-        stateText.text = "-- You FAILED --\nPress ENTER to try again";
-        drawTextField(canvasBD, stateText);
+        if (game_type == 'singleplayer') {
+          canvasBD.colorTransform(new Rectangle(0, 0, WIDTH, HEIGHT), redTint);
+          stateText.text = "-- You FAILED --\nPress ENTER to try again";
+          drawTextField(canvasBD, stateText);
+        } else {
+          var tint:ColorTransform = (rules.outcome == 'success' ? blueTint : redTint);
+          canvasBD.colorTransform(new Rectangle(0, 0, WIDTH, HEIGHT), tint);
+        }
       }
 
       canvasBD.unlock();

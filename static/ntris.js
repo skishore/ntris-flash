@@ -349,10 +349,11 @@ var ntris = {
 
     var ready_to_play = accepted && (time_left <= 0);
     if (ready_to_play && !room.game_state.playing) {
-      console.log('Started multiplayer game');
+      var rules = JSON.stringify(room.game.rules);
+      room.local_board.swf.set_rules(room.game.start_ts, rules);
       room.game_state.playing = true;
     } else if (!ready_to_play && room.game_state.playing) {
-      console.log('Terminated multiplayer game - resetting to singleplayer');
+      room.local_board.swf.set_rules(Date.now(), 'singleplayer');
       room.game_state.playing = false;
     }
 
