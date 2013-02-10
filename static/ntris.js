@@ -132,6 +132,10 @@ var ntris = {
         num_remote_boards: 0,
         remote_boards: {},
         game: null,
+        game_state: {
+          countdown: null,
+          playing: false,
+        },
       };
       this.rooms[name] = room;
       this.ui.create_room_tab(room);
@@ -321,12 +325,38 @@ var ntris = {
       }
       room.game = data.game;
       room.last_game = data.last_game;
-      this.ui.update_game_state(room);
+      this.update_game_state(room);
     } else if (data.members.indexOf(this.user.sid) != -1) {
       this.socket.sendLine(JSON.dumps(['leave_room', data.name]));
     }
-    var in_game = (data.game && data.game.started);
+    var in_game = (data.game && data.game.accepted);
     this.ui.update_room_sizes(data.room, data.label, data.members.length, in_game);
+  },
+
+  update_game_state: function(room) {
+    var accepted = room.game && room.game.accepted;
+    var time_left = (room.game ? Math.ceil(room.game.start_ts - Date.now()/1000) : 0);
+
+    var in_countdown = accepted && (time_left > 0);
+    if (in_countdown && !room.game_state.countdown) {
+      room.game_state.countdown = setInterval(function() {
+        ntris.update_game_state(room);
+      }, 1000);
+    } else if (!in_countdown && room.game_state.countdown) {
+      clearInterval(room.game_state.countdown);
+      room.game_state.countdown = null;
+    }
+
+    var ready_to_play = accepted && (time_left <= 0);
+    if (ready_to_play && !room.game_state.playing) {
+      console.log('Started multiplayer game');
+      room.game_state.playing = true;
+    } else if (!ready_to_play && room.game_state.playing) {
+      console.log('Terminated multiplayer game - resetting to singleplayer');
+      room.game_state.playing = false;
+    }
+
+    this.ui.update_game_state(room);
   },
 
   on_board_update: function(data) {
@@ -352,6 +382,7 @@ var ntris = {
   },
 
   on_disconnect: function() {
+    // TODO: Leave all rooms other than the lobby here, and drop all other users.
     this.connected = false;
     this.ui.disconnected();
   },

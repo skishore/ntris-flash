@@ -337,3 +337,8 @@ button.logged-in {
 .accepted {
   margin-top: 8px;
 }
+
+.countdown {
+  font-size: 48px;
+  text-align: center;
+}

@@ -305,19 +305,28 @@ var ntris_ui = {
       }
       html += '</table>';
 
-      var acceptances = room.game.acceptances.length;
-      html += '<div>' + acceptances + ' acceptance' + (acceptances == 1 ? '' : 's');
-      html += ' (need ' + Math.max(Math.floor(room.members.length/2) + 1, 2) + ')</div>';
-
       var accepted = (room.game.acceptances.indexOf(ntris.user.sid) != -1);
-      if (accepted) {
-        html += '<div class="accepted">You accepted! You can still '
-        html += '<a class="reject-link" href="#">reject this game</a>.</div>';
+      if (room.game.accepted) {
+        var time_left = Math.ceil(room.game.start_ts - Date.now()/1000);
+        if (time_left > 0) {
+          html += '<div>This game will start in:</div>';
+          html += '<div class="countdown">' + time_left + '</div>';
+        } else {
+          html += '<div>This game has started!</div>';
+        }
+      } else {
+        var acceptances = room.game.acceptances.length;
+        html += '<div>' + acceptances + ' acceptance' + (acceptances == 1 ? '' : 's');
+        html += ' (need ' + Math.max(Math.floor(room.members.length/2) + 1, 2) + ')</div>';
+        if (accepted) {
+          html += '<div class="accepted">You accepted! You can still '
+          html += '<a class="reject-link" href="#">reject this game</a>.</div>';
+        }
       }
 
       elt.find('.multiplayer-rules').html(html);
       elt.find('.create-game').addClass('hidden');
-      if (accepted) {
+      if (accepted || room.game.accepted) {
         elt.find('.accept-game, .reject-game').addClass('hidden');
         elt.find('.reject-link').click(function(event) {
           ntris.decide_game(room.name, false);

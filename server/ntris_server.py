@@ -20,6 +20,8 @@ policy_file = '''
 </cross-domain-policy>
 ''' % (port,)
 
+game_start_delay = 5
+
 # Cursor open on the MySQL instance. Tolerates up to one OperaionalError
 # per execute call, because our connection might be timed out by the server.
 class CursorWithRetry(object):
@@ -257,7 +259,8 @@ class ntrisGame(object):
     self.proposer = session.name
     self.acceptances = [session.sid]
     self.rules = rules
-    self.started = False
+    self.accepted = False
+    self.start_ts = 0
     self.rejector = None
 
   def to_dict(self):
@@ -265,12 +268,14 @@ class ntrisGame(object):
         proposer=self.proposer,
         acceptances=self.acceptances,
         rules=self.rules,
-        started=self.started,
+        accepted=self.accepted,
+        start_ts=self.start_ts,
         rejector=self.rejector,
       )
 
   def start(self):
-    self.started = True
+    self.accepted = True
+    self.start_ts = int(time.time()) + game_start_delay
 
 # Class that stores data about the users in a given room.
 class ntrisRoom(object):
