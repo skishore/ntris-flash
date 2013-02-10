@@ -321,7 +321,7 @@ class ntrisRoom(object):
       self.game.acceptances = [sid for sid in self.game.acceptances if sid in self.members]
       if len(self.game.acceptances) > max(len(self.members)/2, 1):
         self.game.start()
-    self.broadcast('room_update', self.to_dict())
+    self.server.broadcast('room_update', self.to_dict())
 
   def clear_game(self, rejector):
     self.game.rejector = rejector

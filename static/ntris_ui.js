@@ -233,7 +233,7 @@ var ntris_ui = {
     }
 
     $('#' + room.id).find('.users').menu();
-    if (lobby && false) {
+    if (lobby) {
       $('#' + room.id).find('.rooms').menu();
     } else {
       var multiplayer = $('#' + room.id).find('.rooms').parent();
