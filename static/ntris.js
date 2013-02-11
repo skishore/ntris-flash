@@ -63,12 +63,12 @@ var ntris = {
     }
   },
 
-  submit_create_room: function(label) {
+  submit_create_room: function(rules) {
     if (this.connected) {
-      if (!label) {
-        this.ui.set_dialog_error('create-room', 'Enter a name for your room.');
+      if (rules.type == 'battle') {
+        this.ui.set_dialog_error('create-room', 'Battle mode has not been implemented yet.');
       } else {
-        this.socket.sendLine(JSON.stringify(['create_room', label]));
+        this.socket.sendLine(JSON.stringify(['create_room', rules]));
       }
     } else {
       this.ui.set_dialog_error('create-room', 'Not connected to the server.');
@@ -86,21 +86,6 @@ var ntris = {
       }
     } else {
       this.ui.set_dialog_error('join-room', 'Not connected to the server.');
-    }
-  },
-
-  submit_create_game: function(room, rules) {
-    if (this.connected) {
-      if (rules.type == 'battle') {
-        this.ui.set_dialog_error('create-game', 'Battle mode has not been implemented yet.');
-      } else {
-        this.socket.sendLine(JSON.stringify(['create_game', {
-          room: room,
-          rules: rules,
-        }]));
-      }
-    } else {
-      this.ui.set_dialog_error('create-game', 'Not connected to the server.');
     }
   },
 
@@ -272,10 +257,6 @@ var ntris = {
     this.ui.set_dialog_error('join-room', error);
   },
 
-  on_create_game_error: function(error) {
-    this.ui.set_dialog_error('create-game', error);
-  },
-
   on_change_username: function(data) {
     if (data.sid == this.user.sid) {
       this.ui.close_dialogs();
@@ -295,10 +276,6 @@ var ntris = {
   on_leave_room: function(name) {
     this.ui.close_dialogs();
     this.drop_room(name);
-  },
-
-  on_create_game: function() {
-    this.ui.close_dialogs();
   },
 
   on_room_update: function(data) {
@@ -325,8 +302,7 @@ var ntris = {
     } else if (data.members.indexOf(this.user.sid) != -1) {
       this.socket.sendLine(JSON.dumps(['leave_room', data.name]));
     }
-    var in_game = (data.game && data.game.accepted);
-    this.ui.update_room_sizes(data.room, data.label, data.members.length, in_game);
+    this.ui.update_rooms_list(data.room, data.label, data.members, data.game);
   },
 
   update_game_state: function(room) {

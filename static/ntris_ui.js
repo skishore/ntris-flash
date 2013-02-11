@@ -1,7 +1,6 @@
 var ntris_ui = {
   initialize: function() {
     this._room_prototype = $('#room-prototype').html();
-    this._multiplayer_prototype = $('#multiplayer-prototype').html();
     $('.prototype').remove();
 
     $('#tabs').tabs();
@@ -53,27 +52,7 @@ var ntris_ui = {
       }
     });
 
-    function submit_create_room() {
-      ntris.submit_create_room($('#create-room-name').val());
-    };
     $('#create-room-dialog').dialog($.extend(attrs, {
-     buttons: {
-        Submit: submit_create_room,
-        Cancel: function() {
-          $('#create-room-dialog').dialog('close');
-        },
-      },
-    }));
-    $('#create-room-name').keydown(function(e) {
-      if (e.keyCode == 13) {
-        submit_create_room();
-        e.preventDefault();
-      }
-    });
-
-    $('#join-room-dialog').dialog($.extend(attrs, {}));
-
-    $('#create-game-dialog').dialog($.extend(attrs, {
       buttons: {
         Submit: function() {
           var rules = {
@@ -82,10 +61,10 @@ var ntris_ui = {
           if (rules.type == 'sprint') {
             rules.target = $('#point-target').slider('option', 'value');
           }
-          ntris.submit_create_game($('#create-game-room').val(), rules);
+          ntris.submit_create_room(rules);
         },
         Cancel: function() {
-          $('#create-game-dialog').dialog('close');
+          $('#create-room-dialog').dialog('close');
         },
       },
     }));
@@ -104,6 +83,27 @@ var ntris_ui = {
         $('#point-target-value').html(ui.value);
       },
     });
+
+    $('#join-room-dialog').dialog($.extend(attrs, {}));
+  },
+
+  show_create_room_dialog: function(elt) {
+    if (ntris.rooms.hasOwnProperty(name) && ntris.rooms[name].last_game) {
+      var rules = ntris.rooms[name].last_game.rules;
+      $('#game-type').val(rules.type);
+      $('#game-type').trigger('change');
+      if (rules.type == 'sprint') {
+        $('#point-target').slider('option', 'value', rules.target);
+        $('#point-target-value').html(rules.target);
+      }
+    } else {
+      $('#game-type').val('sprint');
+      $('#game-type').trigger('change');
+      $('#point-target').slider('option', 'value', 100);
+      $('#point-target-value').html(100);
+    }
+
+    this.show_dialog('create-room');
   },
 
   show_join_room_dialog: function(name, label, size, in_game) {
@@ -162,29 +162,6 @@ var ntris_ui = {
     this.show_dialog('join-room');
   },
 
-  show_create_game_dialog: function(elt) {
-    var id = elt.parentElement.parentElement.parentElement.parentElement.id;
-    var name = id.substring(0, id.length - 5);
-
-    if (ntris.rooms.hasOwnProperty(name) && ntris.rooms[name].last_game) {
-      var rules = ntris.rooms[name].last_game.rules;
-      $('#game-type').val(rules.type);
-      $('#game-type').trigger('change');
-      if (rules.type == 'sprint') {
-        $('#point-target').slider('option', 'value', rules.target);
-        $('#point-target-value').html(rules.target);
-      }
-    } else {
-      $('#game-type').val('sprint');
-      $('#game-type').trigger('change');
-      $('#point-target').slider('option', 'value', 100);
-      $('#point-target-value').html(100);
-    }
-
-    this.show_dialog('create-game');
-    $('#create-game-room').val(name);
-  },
-
   show_dialog: function(dialog) {
     this.set_dialog_error(dialog, '');
     $('#' + dialog + '-dialog').find('input').val('');
@@ -237,18 +214,13 @@ var ntris_ui = {
 
     $('#' + room.id).find('.users').menu();
     if (lobby) {
+      var elt = $('#' + room.id).find('.multiplayer').parent();
+      elt.find('.header').html('Games:');
+      $('#' + room.id).find('.multiplayer').remove();
+      elt.append('<ul class="rooms"></ul>');
       $('#' + room.id).find('.rooms').menu();
     } else {
-      var multiplayer = $('#' + room.id).find('.rooms').parent();
-      multiplayer.find('.header').html('Multiplayer:');
-      multiplayer.find('.rooms').remove();
-      multiplayer.append(this._multiplayer_prototype);
-      multiplayer.find('.accept-game').click(function() {
-        ntris.decide_game(room.name, true);
-      });
-      multiplayer.find('.reject-game').click(function() {
-        ntris.decide_game(room.name, false);
-      });
+      $('#' + room.id + ' .boards').html('');
     }
 
     $('#' + room.id).find('.chat').keydown(function(e) {
@@ -295,12 +267,11 @@ var ntris_ui = {
   },
 
   update_game_state: function(room) {
-    // TODO: Use divs coded by sid instead of hardcoding proposer/rejector names
-    // here. This will allow us to change these names if the users log in/out.
-    var elt = $('#' + room.id + ' .multiplayer');
-    if (room.game) {
+    if (room.name == 'lobby') {
+      $('#' + room.id + ' .multiplayer-rules').html('Create or join a game to play multiplayer!');
+    } else {
       var rules = room.game.rules;
-      var html = '<div>' + room.game.proposer + ' has proposed these rules:</div>';
+      var html = "<div>This game's rules:</div>";
       html += '<table class="rules-table">';
       html += '<tr><td class="rules-header">Game type:</td><td class="rule">' + rules.type + '</td></tr>';
       if (rules.type == 'sprint') {
@@ -308,8 +279,7 @@ var ntris_ui = {
       }
       html += '</table>';
 
-      var accepted = (room.game.acceptances.indexOf(ntris.user.sid) != -1);
-      if (room.game.accepted) {
+      if (room.game.started) {
         var time_left = Math.ceil(room.game.start_ts - Date.now()/1000);
         if (time_left > 0) {
           html += '<div>This game will start in:</div>';
@@ -317,42 +287,38 @@ var ntris_ui = {
         } else {
           html += '<div>This game has started!</div>';
         }
-      } else {
-        var acceptances = room.game.acceptances.length;
-        html += '<div>' + acceptances + ' acceptance' + (acceptances == 1 ? '' : 's');
-        html += ' (need ' + Math.max(Math.floor(room.members.length/2) + 1, 2) + ')</div>';
-        if (accepted) {
-          html += '<div class="accepted">You accepted! You can still '
-          html += '<a class="reject-link" href="#">reject this game</a>.</div>';
-        }
       }
 
-      elt.find('.multiplayer-rules').html(html);
-      elt.find('.create-game').addClass('hidden');
-      if (accepted || room.game.accepted) {
-        elt.find('.accept-game, .reject-game').addClass('hidden');
-        elt.find('.reject-link').click(function(event) {
-          ntris.decide_game(room.name, false);
-          event.preventDefault();
-        });
-      } else {
-        elt.find('.accept-game, .reject-game').removeClass('hidden');
-      }
-    } else {
-      var html = '<div>No one has proposed rules for a multiplayer game yet.</div>';
-      if (room.last_game) {
-        html = '<div>The last multiplayer game was rejected by ' + room.last_game.rejector + '.</div>';
-      }
-      elt.find('.multiplayer-rules').html(html);
-      elt.find('.create-game').removeClass('hidden');
-      elt.find('.accept-game, .reject-game').addClass('hidden');
+      $('#' + room.id + ' .multiplayer-rules').html(html);
     }
   },
 
-  update_room_sizes: function(name, label, size, in_game) {
+  update_rooms_list: function(name, label, members, game) {
     var cls = name + '-size';
+    var size = members.length;
+
     if (size) {
-      var link_html = label + ' (' + size + (name == 'lobby' ? ')' : '/6)');
+      if (name == 'lobby') {
+        $('#tablist a[href="#lobby-room"]').html('Lobby (' + size + ')');
+        return;
+      }
+
+      var rules_summary = 'Battle';
+      if (game.rules.type == 'sprint') {
+        rules_summary = 'Sprint to ' + game.rules.target;
+      }
+      var link_html = '<span class="rules-summary">' + rules_summary + '</span> - ';
+      link_html += label + ' (' + size + '/6) <span class="members-list">';
+      for (var i = 0; i < size; i++) {
+        var user = ntris.create_user(members[i].sid, members[i].name);
+        link_html += '<span class="' + user.cls + '">' + user.name + '</span>';
+        if (i == size - 1) {
+          link_html += '</span>';
+        } else {
+          link_html += ', ';
+        }
+      }
+      link_html += '</span>';
       var new_li = '<li><a class="' + cls + '">' + link_html + '</a></li>';
       $('#lobby-room .rooms').each(function() {
         var link = $(this).find('.' + cls);
@@ -364,9 +330,10 @@ var ntris_ui = {
         }
       });
       $('.' + cls).click(function() {
+        var in_game = game && game.started;
         ntris.ui.show_join_room_dialog(name, label, size, in_game);
       });
-      $('#tablist a[href="#' + name + '-room"]').html(link_html);
+      $('#tablist a[href="#' + name + '-room"]').html(label + ' (' + size + '/6)');
     } else {
       $($('.' + cls).parent()).remove();
     }

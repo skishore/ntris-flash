@@ -237,7 +237,7 @@ button.logged-in {
   height: 208px;
 }
 
-#room-prototype, #multiplayer-prototype {
+#room-prototype {
   display: none;
 }
 
@@ -250,80 +250,17 @@ button.logged-in {
 }
 
 .multiplayer {
-  border: solid #BBB;
+  border: solid #AAA;
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
   border-width: 0px 1px 1px;
-  height: 224px;
+  height: 207px;
 }
 
 .multiplayer-rules {
   margin: 0px 8px;
   padding: 8px 0px;
   font-size: 12px;
-}
-
-.multiplayer button {
-  color: #F8F8F8;
-  font-size: 13px!important;
-  border-radius: 4px;
-}
-
-.create-game {
-  background-color: #48F;
-  padding: 20px 4px;
-  width: 90%;
-  margin: 0% 5%;
-}
-
-.create-game:hover {
-  background-color: #59F;
-  color: #FFF;
-}
-
-.create-game:active {
-  background-color: #37F;
-  color: #EEE;
-  padding: 19px 5px 21px 3px;
-}
-
-.accept-game, .reject-game {
-  padding: 4px;
-  width: 42%;
-  margin: 0% -3% 0% 5%;
-}
-
-.accept-game:hover, .reject-game:hover {
-  color: #FFF;
-}
-
-.accept-game:active, .reject-game:active {
-  color: #EEE;
-  padding: 3px 5px 5px 3px;
-}
-
-.accept-game {
-  background-color: #4B4;
-}
-
-.accept-game:hover {
-  background-color: #5C5;
-}
-
-.accept-game:active {
-  background-color: #3A3;
-}
-
-.reject-game {
-  background-color: #D44;
-}
-
-.reject-game:hover {
-  background-color: #E55;
-}
-
-.reject-game:active {
-  background-color: #C33;
 }
 
 #point-target {
@@ -333,7 +270,7 @@ button.logged-in {
 }
 
 .ui-button, .ui-slider-handle {
-  border: 1px solid #AAA!important;
+  border: 1px solid #AAA !important;
 }
 
 .rules-table {
@@ -349,11 +286,11 @@ button.logged-in {
   padding: 6px 0px 2px;
 }
 
-.accepted {
-  margin-top: 8px;
-}
-
 .countdown {
   font-size: 48px;
   text-align: center;
+}
+
+.bold {
+  font-weight: bold;
 }

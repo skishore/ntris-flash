@@ -20,6 +20,12 @@ policy_file = '''
 </cross-domain-policy>
 ''' % (port,)
 
+room_names = {
+    'air_lock': 'Air Lock',
+    'reactor_core': 'Reactor Core',
+    'map_facility': 'Map Facility',
+}
+
 game_start_delay = 5
 
 # Cursor open on the MySQL instance. Tolerates up to one OperaionalError
@@ -170,23 +176,17 @@ class ntrisSession(LineReceiver):
     self.server.broadcast('change_username', self.to_dict())
 
   @handler
-  def on_create_room(self, label):
-    label = label.strip()
-    name = label.lower().replace(' ', '')
-    error = None
-    if len(name) < 4 or len(name) > 32:
-      error = 'Room names must be between 4 and 32 characters.'
-    elif not name.isalnum():
-      error = 'Room names can only contain letters, numbers and spaces.'
-    elif name in self.server.rooms:
-      error = 'That room name is already taken.'
-    if error:
-      return self.send_message('create_room_error', error)
+  def on_create_room(self, rules):
+    unused_names = [name for name in room_names if name not in self.server.rooms]
+    if not unused_names:
+      return self.send_message('create_room_error', 'The server ran out of room names!')
+    (name, label) = (unused_names[0], room_names[unused_names[0]])
     self.send_message('join_room', dict(
         name=name,
         label=label,
       ))
     self.server.rooms[name] = ntrisRoom(self.server, name, label)
+    self.server.rooms[name].game = ntrisGame(self, rules)
     self.server.rooms[name].add_user(self)
 
   @handler
@@ -200,8 +200,6 @@ class ntrisSession(LineReceiver):
     room = self.server.rooms[name]
     if len(room.members) >= 6:
       return self.send_message('join_room_error', 'That room is now full.')
-    if room.game and room.game.accepted:
-      return self.send_message('join_room_error', 'That room is playing a game. You can spectate!')
     self.send_message('join_room', dict(
         name=room.name,
         label=room.label,
@@ -220,61 +218,22 @@ class ntrisSession(LineReceiver):
     if name in self.rooms:
       self.rooms[name].remove_user(self)
 
-  @handler
-  def on_create_game(self, data):
-    # TODO: Add validation for other fields in data.
-    name = data['room']
-    if name not in self.rooms:
-      return self.send_message('create_game_error', 'You are no longer a member of this room.')
-    room = self.rooms[name]
-    if room.game and room.game.accepted:
-      return self.send_message('create_game_error', "You can't propose a game while one is being played!")
-    self.send_message('create_game', '')
-    room.set_game(ntrisGame(self, data['rules']))
-
-  @handler
-  def on_accept_game(self, data):
-    name = data['room']
-    if name in self.rooms:
-      room = self.rooms[name]
-      if room.game and room.game.rules == data['rules']:
-        if self.sid not in room.game.acceptances:
-          room.game.acceptances.append(self.sid)
-          return room.update_game_status()
-      self.send_message('room_update', room.to_dict())
-
-  @handler
-  def on_reject_game(self, data):
-    name = data['room']
-    if name in self.rooms:
-      room = self.rooms[name]
-      if room.game and room.game.rules == data['rules']:
-        if not room.game.accepted:
-          return room.clear_game(self.name)
-      self.send_message('room_update', room.to_dict())
-
 # Class that stores data about the rules and status of a multiplayer game.
 class ntrisGame(object):
   def __init__(self, session, rules):
-    self.proposer = session.name
-    self.acceptances = [session.sid]
     self.rules = rules
-    self.accepted = False
+    self.started = False
     self.start_ts = 0
-    self.rejector = None
 
   def to_dict(self):
     return dict(
-        proposer=self.proposer,
-        acceptances=self.acceptances,
         rules=self.rules,
-        accepted=self.accepted,
+        started=self.started,
         start_ts=self.start_ts,
-        rejector=self.rejector,
       )
 
   def start(self):
-    self.accepted = True
+    self.started = True
     self.start_ts = int(time.time()) + game_start_delay
 
 # Class that stores data about the users in a given room.
@@ -285,7 +244,6 @@ class ntrisRoom(object):
     self.label = label
     self.members = {}
     self.game = None
-    self.last_game=None
 
   def to_dict(self):
     return dict(
@@ -293,41 +251,22 @@ class ntrisRoom(object):
         label=self.label,
         members=[session.to_dict() for session in self.members.itervalues()],
         game=(self.game.to_dict() if self.game else None),
-        last_game=(self.last_game.to_dict() if self.last_game else None),
       )
 
   def add_user(self, session):
     if session.sid not in self.members:
       self.members[session.sid] = session
       session.rooms[self.name] = self
-      self.update_game_status()
+      self.server.broadcast('room_update', self.to_dict())
 
   def remove_user(self, session):
     if session.sid in self.members:
       del self.members[session.sid]
       if self.name in session.rooms:
         del session.rooms[self.name]
-      self.update_game_status()
+      self.server.broadcast('room_update', self.to_dict())
       if self.name != 'lobby' and not len(self.members):
         del self.server.rooms[self.name]
-
-  def set_game(self, game):
-    self.last_game = None
-    self.game = game
-    self.broadcast('room_update', self.to_dict())
-
-  def update_game_status(self):
-    if self.game:
-      self.game.acceptances = [sid for sid in self.game.acceptances if sid in self.members]
-      if len(self.game.acceptances) > max(len(self.members)/2, 1):
-        self.game.start()
-    self.server.broadcast('room_update', self.to_dict())
-
-  def clear_game(self, rejector):
-    self.game.rejector = rejector
-    self.last_game = self.game
-    self.game = None
-    self.broadcast('room_update', self.to_dict())
 
   def broadcast(self, type, data):
     line = json.dumps([type, data])

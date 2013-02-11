@@ -33,8 +33,8 @@
         <button class="logged-out" onclick="ntris.ui.show_dialog('login')">
           Log in
         </button>
-        <button onclick="ntris.ui.show_dialog('create-room')">
-          Create room
+        <button onclick="ntris.ui.show_create_room_dialog()">
+          Create game
         </button>
         <!--button onclick="ntris.play_singleplayer()">
           Play singleplayer
@@ -66,10 +66,7 @@
         <div class="header">
           Games:
         </div>
-        <ul class="rooms">
-          <li><a href="#"><span style="font-weight: bold;">Sprint to 100</span> - Grand Windchamber (7/7)<br>
-                          <span style="font-size: 10px">skishore, wuthefwasthat, spartacus, singularity, lknight, pchrist, brilee, bhamrick</span></a></li>
-        </ul>
+        <ul class="rooms"></ul>
       </div>
     </div>
   </div>
@@ -82,9 +79,13 @@
     </div>
     <div class="container">
       <div class="header">
-        Rooms:
+        Multiplayer:
       </div>
-      <ul class="rooms"></ul>
+      <div class="multiplayer">
+        <div class="multiplayer-rules">
+          <div>Create or join a game to play multiplayer!</div>
+        </div>
+      </div>
     </div>
 
     <div class="large container">
@@ -101,16 +102,7 @@
 </div>
 
 <div id="multiplayer-prototype" class="hidden prototype">
-  <div class="multiplayer">
-    <div class="multiplayer-rules">
-      <div>No one has proposed rules for a multiplayer game yet.</div>
-    </div>
-    <button class="create-game" onclick="ntris.ui.show_create_game_dialog(this)">
-      Play multiplayer!
-    </button>
-    <button class="accept-game hidden">Accept</button>
-    <button class="reject-game hidden">Reject</button>
-  </div>
+
 </div>
 
 <div id="login-dialog" title="Log in">
@@ -153,25 +145,7 @@
   <div id="signup-error" class="error"></div>
 </div>
 
-<div id="create-room-dialog" title="Create a new room">
-  <form><fieldset>
-    <table>
-      <tr>
-        <td><label for="create-room-name">Room name:</label></td>
-        <td><input type="text" id="create-room-name"></td>
-      </tr>
-    </table>
-  </fieldset></form>
-  <div id="create-room-error" class="error"></div>
-</div>
-
-<div id="join-room-dialog" title="Room details">
-  <div id="room-details"></div>
-  <div id="room-membership"></div>
-  <div id="join-room-error" class="error"></div>
-</div>
-
-<div id="create-game-dialog" title="Propose a game">
+<div id="create-room-dialog" title="Create a new game">
   <form><fieldset>
     <table>
       <tr>
@@ -190,8 +164,13 @@
           <div id="point-target"></div>
         </td>
       </tr>
-      <input type="text" id="create-game-room" class="hidden">
     </table>
   </fieldset></form>
-  <div id="create-game-error" class="error"></div>
+  <div id="create-room-error" class="error"></div>
+</div>
+
+<div id="join-room-dialog" title="Room details">
+  <div id="room-details"></div>
+  <div id="room-membership"></div>
+  <div id="join-room-error" class="error"></div>
 </div>
