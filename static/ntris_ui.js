@@ -307,18 +307,8 @@ var ntris_ui = {
       if (game.rules.type == 'sprint') {
         rules_summary = 'Sprint to ' + game.rules.target;
       }
-      var link_html = '<span class="rules-summary">' + rules_summary + '</span> - ';
-      link_html += label + ' (' + size + '/6) <span class="members-list">';
-      for (var i = 0; i < size; i++) {
-        var user = ntris.create_user(members[i].sid, members[i].name);
-        link_html += '<span class="' + user.cls + '">' + user.name + '</span>';
-        if (i == size - 1) {
-          link_html += '</span>';
-        } else {
-          link_html += ', ';
-        }
-      }
-      link_html += '</span>';
+      var room_title = label + ' (' + size + '/6)';
+      var link_html = '<span class="bold">' + room_title + '</span> - ' + rules_summary;
       var new_li = '<li><a class="' + cls + '">' + link_html + '</a></li>';
       $('#lobby-room .rooms').each(function() {
         var link = $(this).find('.' + cls);
@@ -333,7 +323,7 @@ var ntris_ui = {
         var in_game = game && game.started;
         ntris.ui.show_join_room_dialog(name, label, size, in_game);
       });
-      $('#tablist a[href="#' + name + '-room"]').html(label + ' (' + size + '/6)');
+      $('#tablist a[href="#' + name + '-room"]').html(room_title);
     } else {
       $($('.' + cls).parent()).remove();
     }
