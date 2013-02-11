@@ -20,11 +20,10 @@ policy_file = '''
 </cross-domain-policy>
 ''' % (port,)
 
-room_names = {
-    'air_lock': 'Air Lock',
-    'reactor_core': 'Reactor Core',
-    'map_facility': 'Map Facility',
-}
+room_names = dict(
+  (label.lower().replace(' ', '_'), label)
+  for label in [line.strip() for line in open('server/room_names.dat').readlines()]
+)
 
 game_start_delay = 5
 
@@ -180,7 +179,8 @@ class ntrisSession(LineReceiver):
     unused_names = [name for name in room_names if name not in self.server.rooms]
     if not unused_names:
       return self.send_message('create_room_error', 'The server ran out of room names!')
-    (name, label) = (unused_names[0], room_names[unused_names[0]])
+    i = randint(0, len(unused_names) - 1)
+    (name, label) = (unused_names[i], room_names[unused_names[i]])
     self.send_message('join_room', dict(
         name=name,
         label=label,
