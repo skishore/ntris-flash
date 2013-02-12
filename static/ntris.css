@@ -43,7 +43,7 @@ body {
   background-color: #FCC;
   border: 1px solid #866;
   padding: 2px;
-  width: 1240px;
+  width: 100%;
 }
 
 #topbar.connecting {
