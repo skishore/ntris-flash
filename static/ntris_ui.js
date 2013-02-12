@@ -343,8 +343,9 @@ var ntris_ui = {
   },
 
   chat: function(room, user, message) {
-    var html = ('<div class="chat-message"><span class="chat-name">'
-        + user.name + ':</span> ' + message + '</div>');
+    var html = ('<div class="chat-message"><span class="chat-name">' +
+                '<span class="' + user.cls + '">' + user.name + '</span>' +
+                ':</span> ' + message + '</div>');
     var elt = $('#' + room.id).find('.chatbox');
     var at_bottom = this.at_bottom(elt);
     elt.append(html);
