@@ -21,7 +21,6 @@ policy_file = '''
 ''' % (port,)
 
 labels = [line.strip() for line in open('server/room_names.dat').readlines()]
-labels = [label for label in labels if len(label) < 13]
 room_names = dict((label.lower().replace(' ', '_'), label) for label in labels)
 
 game_start_delay = 5

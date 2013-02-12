@@ -308,7 +308,7 @@ var ntris_ui = {
         rules_summary = 'Sprint to ' + game.rules.target;
       }
       var room_title = label + ' (' + size + '/6)';
-      var link_html = '<span class="bold">' + room_title + '</span> - ' + rules_summary;
+      var link_html = '<span class="bold block">' + room_title + '</span>' + rules_summary;
       var new_li = '<li><a class="' + cls + '">' + link_html + '</a></li>';
       $('#lobby-room .rooms').each(function() {
         var link = $(this).find('.' + cls);
