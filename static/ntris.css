@@ -70,7 +70,7 @@ button.logged-in {
 
 #tabs {
   margin-top: 16px;
-  width: 1190px;
+  width: 1195px;
 }
 
 #tablist button {
@@ -111,17 +111,17 @@ button.logged-in {
 }
 
 .container .users {
-  width: 130px;
+  width: 125px;
 }
 
 .container .multiplayer, .container .rooms {
-  width: 240px;
+  width: 250px;
 }
 
 .large.container {
   float: left;
   margin: 8px;
-  width: 398px;
+  width: 403px;
 }
 
 .header {
@@ -148,14 +148,14 @@ button.logged-in {
   border: solid #666;
   border-width: 1px 1px 1px 0px;
   padding: 2px;
-  width: 329px;
+  width: 334px;
 }
 
 .chatbox {
   border: solid #AAA;
   border-width: 0px 1px;
   height: 182px;
-  width: 392px;
+  width: 397px;
 
   font-size: 12px;
   overflow-y: auto;
@@ -212,7 +212,7 @@ button.logged-in {
 
 .right-side {
   float: left;
-  width: 414px;
+  width: 419px;
 }
 
 .game.header {
