@@ -20,10 +20,9 @@ policy_file = '''
 </cross-domain-policy>
 ''' % (port,)
 
-room_names = dict(
-  (label.lower().replace(' ', '_'), label)
-  for label in [line.strip() for line in open('server/room_names.dat').readlines()]
-)
+labels = [line.strip() for line in open('server/room_names.dat').readlines()]
+labels = [label for label in labels if len(label) < 13]
+room_names = dict((label.lower().replace(' ', '_'), label) for label in labels)
 
 game_start_delay = 5
 
@@ -144,8 +143,8 @@ class ntrisSession(LineReceiver):
       return
     (name, email, password) = (data['name'], data['email'], data['password'])
     error = None
-    if len(name) < 4 or len(name) > 32:
-      error = 'Your username must be between 4 and 32 characters.'
+    if len(name) < 4 or len(name) > 16:
+      error = 'Your username must be between 4 and 16 characters.'
     elif not name.isalnum():
       error = 'Your username must be alphanumeric.'
     elif len(email) > 64:
