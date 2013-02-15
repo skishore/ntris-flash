@@ -20,7 +20,7 @@ policy_file = '''
 </cross-domain-policy>
 ''' % (port,)
 
-labels = [line.strip() for line in open('server/room_names.dat').readlines()]
+labels = set(line.strip() for line in open('server/room_names.dat').readlines())
 room_names = dict((label.lower().replace(' ', '_'), label) for label in labels)
 
 game_start_delay = 5
